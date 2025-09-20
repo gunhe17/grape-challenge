@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Database
+*.db
+database/*.db
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.github
+
+# OS
+.DS_Store
+
+# Claude
+.claude/
+
+# Logs
+*.log
