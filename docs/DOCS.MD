@@ -14,21 +14,23 @@
 {
   "users": [
     {
-      "id": "integer (auto-increment)",
+      "id": "uuid",
       "name": "string (required)",
-      "role": "string (default: 'user', enum: ['user', 'admin'])",
-      "created_at": "datetime (ISO format)",
-      "updated_at": "datetime (ISO format)"
+      "cell": "string (required)",
+      "role": "string (required)",
+      "created_at": "datetime (ISO format)"
     }
   ]
 }
 ```
 
-**CRUD Operations**
-- **Create**: 회원가입
-- **Read**: User 정보 조회, 전체 User 목록 (Admin)
-- **Update**: User 정보 수정
-- **Delete**: 회원 탈퇴
+**Usecase**
+- **Create**:
+  - 사용자 생성
+- **Read**:
+  - 로그인 (name, cell)
+  - 사용자 정보 조회
+  - (Admin) 사용자 전체 조회
 
 ---
 
@@ -37,11 +39,11 @@
 {
   "sessions": [
     {
-      "id": "integer (auto-increment)",
-      "user_id": "integer (required, references users.id)",
-      "fruit_id": "integer (optional, references fruit_templates.id)",
-      "mission_ids": "array of integers (completed mission ids)",
-      "status": "string (default: 'active', enum: ['active', 'completed'])",
+      "id": "uuid",
+      "user_id": "uuid (required, references users.id)",
+      "fruit_id": "uuid (optional, references fruits.id)",
+      "mission_ids": "array of uuids (optional, references missions.id)",
+      "status": "string (default: 'in progress', enum: ['in progress', 'completed'])",
       "created_at": "datetime (ISO format)",
       "updated_at": "datetime (ISO format)"
     }
@@ -49,11 +51,12 @@
 }
 ```
 
-**CRUD Operations**
-- **Create**: 새로운 Growth Session 시작
-- **Read**: 현재 Session 상태 조회
-- **Update**: Mission 완료시 mission_ids 추가, 상태 변경
-- **Delete**: Session 초기화
+**Usecase**
+- **Create**: 세션 시작
+- **Read**:
+  - 현재 세션 상태 조회
+  - 진행 중인 세션 조회
+- **Update**: 미션 완료 시 mission_ids 추가, 상태 변경
 
 ---
 
@@ -65,23 +68,25 @@
       "id": "integer (auto-increment)",
       "name": "string (required)",
       "type": "string (default: 'normal', enum: ['normal', 'special'])",
-      "seed_image": "string (optional)",
-      "germination_image": "string (optional)",
-      "seedling_image": "string (optional)",
-      "juvenile_image": "string (optional)",
-      "vegetative_image": "string (optional)",
-      "reproductive_image": "string (optional)",
-      "fruiting_image": "string (optional)"
+      "status_images": {
+        "first": "string (optional)",
+        "second": "string (optional)",
+        "third": "string (optional)",
+        "fourth": "string (optional)",
+        "fifth": "string (optional)",
+        "sixth": "string (optional)",
+        "seventh": "string (optional)"
+      }
     }
   ]
 }
 ```
 
-**CRUD Operations**
-- **Create**: 새 과일 Template 생성 (Admin)
-- **Read**: 과일 Template 목록 조회
-- **Update**: Template 정보 수정 (Admin)
-- **Delete**: Template 삭제 (Admin)
+**Usecase**
+- **Create**: 새 과일 템플릿 생성 (Admin)
+- **Read**: 과일 템플릿 목록 조회
+- **Update**: 템플릿 정보 수정 (Admin)
+- **Delete**: 불가 (기존 과일 참조 무결성 보호)
 
 ---
 
@@ -90,9 +95,9 @@
 {
   "fruits": [
     {
-      "id": "integer (auto-increment)",
+      "id": "uuid",
       "template_id": "integer (required, references fruit_templates.id)",
-      "status": "string (default: '씨앗', enum: ['씨앗', '새싹', '나무', '열매'])",
+      "status": "string (default: 'first', enum: ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'])",
       "created_at": "datetime (ISO format)",
       "updated_at": "datetime (ISO format)"
     }
@@ -100,10 +105,10 @@
 }
 ```
 
-**CRUD Operations**
-- **Create**: Session 완료시 과일 생성
+**Usecase**
+- **Create**: 과일 생성
 - **Read**: 보유 과일 조회
-- **Update**: 과일 Growth 상태 변경
+- **Update**: 과일 상태 변경
 - **Delete**: 과일 삭제
 
 ---
@@ -122,11 +127,11 @@
 }
 ```
 
-**CRUD Operations**
-- **Create**: 새 Mission Template 생성 (Admin)
-- **Read**: Mission Template 목록 조회
-- **Update**: Template 내용 수정 (Admin)
-- **Delete**: Template 삭제 (Admin)
+**Usecase**
+- **Create**: 미션 템플릿 생성 (Admin)
+- **Read**: 미션 템플릿 목록 조회
+- **Update**: 템플릿 내용 수정 (Admin)
+- **Delete**: 불가 (기존 미션 참조 무결성 보호)
 
 ---
 
@@ -135,234 +140,19 @@
 {
   "missions": [
     {
-      "id": "integer (auto-increment)",
+      "id": "uuid",
       "template_id": "integer (required, references mission_templates.id)",
-      "status": "string (default: 'pending', enum: ['pending', 'completed'])",
+      "completed_at": "datetime (ISO format)",
       "created_at": "datetime (ISO format)",
-      "completed_at": "datetime (ISO format, optional)"
     }
   ]
 }
 ```
 
-**CRUD Operations**
-- **Create**: 일일 Mission 생성
-- **Read**: Mission 상태 조회
-- **Update**: Mission 완료 처리
-- **Delete**: Mission 삭제
-
----
-
-### JSON Repository Pattern
-
-#### Base Repository
-```python
-class BaseRepository:
-    def __init__(self, json_path):
-        self.json_path = json_path
-    
-    def load_data(self):
-        """JSON 파일에서 데이터 로드"""
-        with open(self.json_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    
-    def save_data(self, data):
-        """JSON 파일에 데이터 저장"""
-        with open(self.json_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-```
-
-#### User Repository
-```python
-class UserRepository(BaseRepository):
-    def create(self, name, role='user')
-    def get_by_id(self, user_id)
-    def get_all(self)
-    def update(self, user_id, **kwargs)
-    def delete(self, user_id)
-```
-
-#### Session Repository
-```python
-class SessionRepository(BaseRepository):
-    def create(self, user_id, fruit_id=None)
-    def get_by_user_id(self, user_id)
-    def get_all(self)
-    def update_mission_ids(self, session_id, mission_ids)
-    def update_status(self, session_id, status)
-    def delete(self, session_id)
-```
-
-#### Fruit Template Repository
-```python
-class FruitTemplateRepository(BaseRepository):
-    def create(self, name, type, **images)
-    def get_by_id(self, template_id)
-    def get_all(self)
-    def update(self, template_id, **kwargs)
-    def delete(self, template_id)
-```
-
-#### Fruit Repository
-```python
-class FruitRepository(BaseRepository):
-    def create(self, template_id, status)
-    def get_by_id(self, fruit_id)
-    def update_status(self, fruit_id, status)
-    def delete(self, fruit_id)
-```
-
-#### Mission Template Repository
-```python
-class MissionTemplateRepository(BaseRepository):
-    def create(self, name, type, content)
-    def get_by_id(self, template_id)
-    def get_all(self)
-    def update(self, template_id, **kwargs)
-    def delete(self, template_id)
-```
-
-#### Mission Repository
-```python
-class MissionRepository(BaseRepository):
-    def create(self, template_id, status)
-    def get_by_id(self, mission_id)
-    def get_all(self)
-    def update_status(self, mission_id, status)
-    def check_daily_limit(self, user_id, date)
-    def delete(self, mission_id)
-```
-
----
-
-### API Endpoints
-
-#### Authentication
-```
-POST /login
-Body: { "name": "string" }
-Response: { "user_id": int, "role": "string", "token": "string" }
-```
-
-#### User APIs
-```
-POST /users
-Body: { "name": "string", "role": "string" }
-
-GET /users/{user_id}
-Response: { "id": int, "name": "string", "role": "string" }
-
-GET /users
-Response: [{ "id": int, "name": "string", "role": "string" }]
-
-PUT /users/{user_id}
-Body: { "name": "string", "role": "string" }
-
-PATCH /users/{user_id}
-Body: { "name": "string" }
-
-DELETE /users/{user_id}
-```
-
-#### Session APIs
-```
-POST /sessions
-Body: { "user_id": int, "fruit_id": int }
-
-GET /sessions/user/{user_id}
-Response: { "id": int, "user_id": int, "fruit_id": int, "mission_ids": [], "status": "string" }
-
-GET /sessions
-Response: [{ "id": int, "user_id": int, "mission_ids": [], "status": "string" }]
-
-PUT /sessions/{session_id}
-Body: { "fruit_id": int, "mission_ids": [], "status": "string" }
-
-PATCH /sessions/{session_id}/missions
-Body: { "mission_ids": [] }
-
-PATCH /sessions/{session_id}/status
-Body: { "status": "string" }
-
-DELETE /sessions/{session_id}
-```
-
-#### Fruit Template APIs
-```
-POST /fruit-templates
-Body: { "name": "string", "type": "string", "seed_image": "string", ... }
-
-GET /fruit-templates
-Response: [{ "id": int, "name": "string", "type": "string", ... }]
-
-GET /fruit-templates/{template_id}
-Response: { "id": int, "name": "string", "type": "string", ... }
-
-PUT /fruit-templates/{template_id}
-Body: { "name": "string", "type": "string", "seed_image": "string", ... }
-
-PATCH /fruit-templates/{template_id}
-Body: { "name": "string" }
-
-DELETE /fruit-templates/{template_id}
-```
-
-#### Fruit APIs
-```
-POST /fruits
-Body: { "template_id": int, "status": "string" }
-
-GET /fruits/{fruit_id}
-Response: { "id": int, "template_id": int, "status": "string", "created_at": "datetime" }
-
-PUT /fruits/{fruit_id}
-Body: { "template_id": int, "status": "string" }
-
-PATCH /fruits/{fruit_id}/status
-Body: { "status": "string" }
-
-DELETE /fruits/{fruit_id}
-```
-
-#### Mission Template APIs
-```
-POST /mission-templates
-Body: { "name": "string", "type": "string", "content": "string" }
-
-GET /mission-templates
-Response: [{ "id": int, "name": "string", "type": "string", "content": "string" }]
-
-GET /mission-templates/{template_id}
-Response: { "id": int, "name": "string", "type": "string", "content": "string" }
-
-PUT /mission-templates/{template_id}
-Body: { "name": "string", "type": "string", "content": "string" }
-
-PATCH /mission-templates/{template_id}
-Body: { "content": "string" }
-
-DELETE /mission-templates/{template_id}
-```
-
-#### Mission APIs
-```
-POST /missions
-Body: { "template_id": int, "status": "string" }
-
-GET /missions/{mission_id}
-Response: { "id": int, "template_id": int, "status": "string", "created_at": "datetime", "completed_at": "datetime" }
-
-GET /missions
-Response: [{ "id": int, "template_id": int, "status": "string", "created_at": "datetime" }]
-
-PUT /missions/{mission_id}
-Body: { "template_id": int, "status": "string" }
-
-PATCH /missions/{mission_id}/complete
-Body: { "completed_at": "datetime" }
-
-DELETE /missions/{mission_id}
-```
+**Usecase**
+- **Create**: 미션 생성
+- **Read**: 미션 조회
+- **Delete**: 미션 삭제
 
 ---
 
@@ -374,27 +164,76 @@ Components:
 ├── LoginForm
 └── LoginButton
 
-APIs:
-└── POST /login
+트랜잭션 단위 API Flow:
+
+1. 로그인 시도
+   POST /user/login
+   {
+     "name": "string",
+     "cell": "string"
+   }
+
+   처리 단계:
+   - User 인증 (name + cell 조합으로 검증)
+   - 성공 시 user 정보 및 JWT 토큰 반환
+   - 실패 시 401 Unauthorized
+
+   성공 응답:
+   {
+     "user": {
+       "id": "uuid",
+       "name": "string",
+       "cell": "string",
+       "role": "string"
+     },
+     "token": "jwt_token"
+   }
 ```
 
 #### Home Page
 ```
 Components:
 ├── CurrentFruitProgress
-│   ├── FruitImage (mission_ids count에 따른 이미지)
+│   ├── FruitImage (fruit status에 따른 이미지)
 │   └── ProgressBar (7단계 진행률)
 ├── TodayMission
 │   ├── MissionContent
 │   └── CompleteButton
 └── MissionHistory
 
-APIs:
-├── GET /sessions/user/{user_id}
-├── GET /fruit-templates/{template_id}
-├── GET /mission-templates
-├── POST /missions
-└── PATCH /sessions/{session_id}/missions
+트랜잭션 단위 API Flow:
+
+1. 페이지 로드 (3개 API 병렬 호출)
+   GET /session/user/{user_id}/in-progress
+   GET /mission-template/{mission_template_id}
+   GET /fruit-template/{template_id} (과일 이미지용, session에 fruit가 있을 때)
+
+   처리 결과:
+   - 현재 Session 상태 (mission_ids 개수로 진행률 표시)
+   - 오늘의 Mission Template (랜덤 선택)
+   - Fruit 이미지 (status에 따른 단계 이미지)
+
+2. Mission 완료 (Atomic Transaction)
+   POST /mission/complete
+   {
+     "user_id": "uuid",
+     "mission_template_id": "integer"
+   }
+
+   처리 단계 (All or Nothing):
+   a) 하루 1회 제한 체크
+   b) Mission 생성 (completed_at = now)
+   c) Session mission_ids 배열에 추가
+   d) 첫 Mission인 경우: Fruit 생성 + Session fruit_id 업데이트
+   e) 기존 Fruit status 업데이트 (mission 개수에 따라)
+   f) 7개 완료 시: Session 완료 + 새 Session 생성
+
+   성공 응답:
+   {
+     "mission": { "id": "uuid", "template_id": 1, "completed_at": "2024-01-01T10:00:00Z" },
+     "session": { "id": "uuid", "mission_ids": ["uuid1", "uuid2"], "fruit_id": "uuid" },
+     "fruit": { "id": "uuid", "status": "second", "template_id": 3 }
+   }
 ```
 
 #### Fruit Page
@@ -404,62 +243,95 @@ Components:
 │   └── FruitCard
 └── FruitGallery
 
-APIs:
-├── GET /sessions/user/{user_id}
-└── GET /fruit-templates
+트랜잭션 단위 API Flow:
+
+1. 페이지 로드 (완료된 과일 목록 표시)
+   GET /sessions/user/{user_id}?status=completed
+   GET /fruit-templates (전체 템플릿 목록)
+
+   처리 결과:
+   - 완료된 Session 목록과 연결된 Fruit 정보
+   - 각 Fruit의 Template 정보로 이미지 표시
+   - 완료 날짜순 정렬
 ```
 
 #### Admin Dashboard Page
 ```
 Components:
-├── UserStats
-│   ├── UserList
-│   ├── ParticipationRate
-│   └── CompletionStats
-└── OverallStats
+├── UserStatistics
+│   ├── TotalUserCount
+│   └── UserTable
+│       ├── UserInfo (name, cell, role)
+│       └── SessionCount (total/completed)
+├── SystemOverview
+│   ├── DailyActiveUsers
+│   └── CompletionRates
+└── TemplateManagement
+    ├── FruitTemplateList
+    └── MissionTemplateList
 
-APIs:
-├── GET /users
-├── GET /sessions
-└── GET /missions
-```
+트랜잭션 단위 API Flow:
 
-#### Admin Fruit Page
-```
-Components:
-├── FruitTemplateList
-├── AddFruitForm
-└── EditFruitForm
+1. 대시보드 로드 (통계 데이터 조회)
+   GET /admin/users/statistics
 
-APIs:
-├── GET /fruit-templates
-├── POST /fruit-templates
-├── PUT /fruit-templates/{template_id}
-└── DELETE /fruit-templates/{template_id}
+   처리 결과:
+   {
+     "total_users": 150,
+     "users": [
+       {
+         "id": "uuid",
+         "name": "홍길동",
+         "cell": "1청년부",
+         "role": "member",
+         "statistics": {
+           "total_sessions": 12,
+           "completed_sessions": 10
+         }
+       }
+     ]
+   }
 ```
 
 ---
 
 ### 핵심 Business Logic
 
-#### Mission 완료 Process
+#### Mission 완료 Workflow (Atomic Transaction)
 ```
-1. 하루 1회 제한 체크 (오늘 날짜로 completed mission 존재 여부)
-2. Mission 생성 및 완료 처리
-3. Session의 mission_ids에 추가
-4. mission_ids count가 7이면:
-   - 현재 session status = 'completed'
-   - 새로운 session 생성
+POST /mission/complete
+{
+  "user_id": "uuid",
+  "mission_template_id": "integer"
+}
+
+처리 순서 (Transaction):
+1. 하루 1회 제한 체크 (오늘 날짜로 completed_at이 있는 mission 확인)
+2. Mission 생성 (completed_at = now)
+3. 현재 in-progress Session 조회
+4. Session의 mission_ids에 추가
+5. Session에 첫 mission인 경우:
+   - Fruit 생성 (status: 'first', random template)
+   - Session의 fruit_id 업데이트
+6. 기존 Fruit이 있는 경우 status 업데이트
+7. mission_ids.length == 7인 경우:
+   - 현재 Session status = 'completed'
+   - 새 Session 생성 (fruit_id = null)
+
+성공 응답:
+{
+  "mission": { ... },
+  "session": { ... },
+  "fruit": { ... }
+}
 ```
 
-#### Fruit Image 표시 Logic
+#### Session-Mission-Fruit 관계
 ```
-mission_ids count:
-0-1: seed_image
-2: germination_image
-3: seedling_image
-4: juvenile_image
-5: vegetative_image
-6: reproductive_image
-7: fruiting_image (완성)
+- 한 Session은 여러 날에 걸쳐 진행됨 (최대 7일)
+- 하루에 1개의 Mission만 완료 가능
+- Session 시작 시 fruit_id는 null
+- 첫 Mission 완료 시 Fruit 생성 및 할당
+- Session 완료 시 Fruit도 최종 상태(seventh)가 됨
+- 완료된 Session과 Fruit는 조회만 가능 (수정/삭제 불가)
 ```

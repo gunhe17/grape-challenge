@@ -1,29 +1,32 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from ..config import DATABASE_URL, DATABASE_DIR
-import os
+from pathlib import Path
 
-# Ensure database directory exists
+# Simple database configuration
+DATABASE_DIR = Path(__file__).resolve().parent.parent.parent / "database"
 DATABASE_DIR.mkdir(parents=True, exist_ok=True)
 
-SQLALCHEMY_DATABASE_URL = DATABASE_URL
+DATABASE_URL = f"sqlite:///{DATABASE_DIR}/grape.db"
 
-# Enhanced engine configuration for SQLAlchemy 2.0 compatibility
+# Create SQLAlchemy engine
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in SQLALCHEMY_DATABASE_URL else {},
-    echo=False,  # Set to True for SQL logging
-    pool_pre_ping=True,  # Validate connections before use
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    echo=False  # Set to True for SQL debugging
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
 
 def get_db():
+    """Get database session"""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+def create_tables():
+    """Create all tables defined in models"""
+    Base.metadata.create_all(bind=engine)

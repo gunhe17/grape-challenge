@@ -8,6 +8,9 @@ venv/
 # Database
 *.db
 database/*.db
+grape-challenge/database/db.json
+grape-challenge/database/db_backup.json
+grape-challenge/database/test_db.json
 
 # IDE
 .vscode/
