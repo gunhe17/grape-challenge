@@ -17,7 +17,7 @@ mkdir -p grape-challenge/database
 # 3. Set test environment variables
 echo "3. Setting test environment..."
 export TEST_MODE=true
-export TEST_DB_PATH="$(pwd)/grape-challenge/database/test_db.json"
+export TEST_DB_PATH="$(pwd)/database/test_db.json"
 export PYTHONPATH=.
 
 # 4. Start server in background (with test database)

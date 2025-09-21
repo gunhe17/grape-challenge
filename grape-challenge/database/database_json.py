@@ -11,9 +11,9 @@ class JSONDatabase:
         # Use environment variable for test database
         if db_path is None:
             if os.environ.get('TEST_MODE') == 'true':
-                db_path = os.environ.get('TEST_DB_PATH', 'grape-challenge/database/test_db.json')
+                db_path = os.environ.get('TEST_DB_PATH', '../database/test_db.json')
             else:
-                db_path = 'grape-challenge/database/db.json'
+                db_path = '../database/db.json'
 
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -141,5 +141,4 @@ class JSONDatabase:
             return False
 
 # Global database instance
-db_path = Path(__file__).resolve().parent.parent.parent / "database" / "grape_data.json"
-json_db = JSONDatabase(str(db_path))
+json_db = JSONDatabase()

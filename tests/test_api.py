@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 BASE_URL = "http://localhost:8000"
 PROJECT_ROOT = Path(__file__).parent.parent
-TEST_DB_PATH = PROJECT_ROOT / "grape-challenge" / "database" / "test_db.json"
+TEST_DB_PATH = PROJECT_ROOT / "database" / "test_db.json"
 
 def setup_test_db():
     """Initialize test database"""

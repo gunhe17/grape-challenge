@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}관리자 대시보드 - 성광교회 말씀 Tree{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="/home" class="text-green-600 hover:text-green-700">← 홈으로</a>
+      <h1 class="text-xl font-bold text-green-700">관리자 대시보드</h1>
+      <div></div>
+    </div>
+  </header>
+
+  <div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Statistics Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-lg shadow-md p-6 text-center">
+        <div class="text-3xl font-bold text-blue-600">{{ stats.total_users }}</div>
+        <p class="text-gray-600">총 사용자</p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6 text-center">
+        <div class="text-3xl font-bold text-green-600">{{ stats.active_users if stats.active_users is defined else 0 }}</div>
+        <p class="text-gray-600">활성 사용자</p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6 text-center">
+        <div class="text-3xl font-bold text-orange-600">
+          {% if stats.total_users > 0 %}
+            {{ ((stats.users | selectattr('statistics.completed_sessions', 'greaterthan', 0) | list | length / stats.total_users) * 100) | round(1) }}%
+          {% else %}
+            0%
+          {% endif %}
+        </div>
+        <p class="text-gray-600">완료율</p>
+      </div>
+    </div>
+
+    <!-- User Statistics Table -->
+    <div class="bg-white rounded-lg shadow-md">
+      <div class="px-6 py-4 border-b">
+        <h2 class="text-lg font-semibold">사용자 통계</h2>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이름</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">소속</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">역할</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">총 세션</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">완료 세션</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for user in stats.users %}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ user.name }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ user.cell }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <span class="{% if user.role == 'admin' %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %} px-2 py-1 rounded-full text-xs">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ user.statistics.total_sessions }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ user.statistics.completed_sessions }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

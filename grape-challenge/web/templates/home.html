@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}홈 - 성광교회 말씀 Tree{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pb-20">
+  <!-- Mobile Header -->
+  <header class="bg-white shadow-sm border-b sticky top-0 z-10">
+    <div class="px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="text-2xl">🌳</div>
+        <h1 class="text-lg font-bold text-green-700">말씀 Tree</h1>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-600">{{ user.name }}님</span>
+        <a href="/logout" class="text-gray-400 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="px-4 py-4 space-y-4">
+
+    <!-- Current Fruit Progress - Mobile Card -->
+    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+      <h2 class="text-base font-semibold mb-4 text-gray-800">🌱 현재 과일 성장</h2>
+
+      {% if current_fruit %}
+      <div class="text-center mb-4">
+        <!-- Large fruit image for mobile with emoji fallback -->
+        <div class="w-28 h-28 mx-auto mb-3 fruit-grow flex items-center justify-center">
+          <img src="/static/images/fruits/{{ current_fruit.template.name }}_{{ current_fruit.status }}.png"
+               alt="{{ current_fruit.template.name }}"
+               class="w-full h-full object-contain"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="text-6xl hidden items-center justify-center w-full h-full">
+            {% if current_fruit.template.name == '사과' %}🍎
+            {% elif current_fruit.template.name == '바나나' %}🍌
+            {% elif current_fruit.template.name == '포도' %}🍇
+            {% elif current_fruit.template.name == '오렌지' %}🍊
+            {% elif current_fruit.template.name == '딸기' %}🍓
+            {% elif current_fruit.template.name == '복숭아' %}🍑
+            {% elif current_fruit.template.name == '수박' %}🍉
+            {% elif current_fruit.template.name == '파인애플' %}🍍
+            {% elif current_fruit.template.name == '키위' %}🥝
+            {% elif current_fruit.template.name == '망고' %}🥭
+            {% elif current_fruit.template.name == '레몬' %}🍋
+            {% elif current_fruit.template.name == '체리' %}🍒
+            {% elif current_fruit.template.name == '자두' %}🫐
+            {% elif current_fruit.template.name == '블루베리' %}🫐
+            {% else %}🍎{% endif %}
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg text-gray-800">{{ current_fruit.template.name }}</h3>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="mb-3">
+        <div class="flex justify-between text-xs text-gray-500 mb-1">
+          <span>진행도</span>
+          <span>{{ mission_count }}/7</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500"
+               style="width: {{ (mission_count / 7 * 100) }}%"></div>
+        </div>
+      </div>
+
+      <!-- Progress dots -->
+      <div class="flex justify-center space-x-2">
+        {% for i in range(1, 8) %}
+        <div class="w-2 h-2 rounded-full {% if i <= mission_count %}bg-green-500{% else %}bg-gray-300{% endif %}"></div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-6">
+        <div class="text-4xl mb-3">🌱</div>
+        <p class="text-gray-500 text-sm">미션을 완료하면 과일이 시작됩니다</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Today's Mission - Mobile Card -->
+    <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+      <h2 class="text-base font-semibold mb-4 text-gray-800 flex items-center">
+        <span class="mr-2">📖</span>
+        오늘의 미션
+      </h2>
+
+      {% if daily_completed %}
+      <div class="text-center py-6">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <div class="text-green-500 text-2xl">✓</div>
+        </div>
+        <p class="text-gray-600 font-medium">오늘 미션을 완료했습니다!</p>
+        <p class="text-gray-400 text-sm mt-1">내일 새로운 미션을 만나보세요</p>
+      </div>
+      {% else %}
+      <div class="space-y-4">
+        <!-- Mission content -->
+        <div class="bg-gradient-to-br from-green-50 to-blue-50 p-4 rounded-xl border border-green-100">
+          <h3 class="font-semibold text-green-800 mb-2">{{ today_mission.name }}</h3>
+          <p class="text-green-700 text-sm leading-relaxed">{{ today_mission.content }}</p>
+        </div>
+
+        <!-- Complete button -->
+        <form action="/mission/complete" method="POST">
+          <input type="hidden" name="mission_template_id" value="{{ today_mission.id }}">
+          <button type="submit"
+                  class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 text-base font-semibold rounded-xl hover:from-green-600 hover:to-green-700 active:scale-95 transition-all shadow-lg">
+            ✓ 미션 완료하기
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Quick Actions - Mobile Grid -->
+    <div class="grid grid-cols-2 gap-3">
+      <a href="/fruits"
+         class="bg-gradient-to-br from-orange-100 to-red-100 p-4 rounded-xl text-center active:scale-95 transition-transform border border-orange-200">
+        <div class="text-orange-600 text-2xl mb-2">🍎</div>
+        <span class="text-orange-800 font-semibold text-sm">내 과일들</span>
+      </a>
+
+      {% if user.role == 'admin' %}
+      <a href="/admin"
+         class="bg-gradient-to-br from-blue-100 to-indigo-100 p-4 rounded-xl text-center active:scale-95 transition-transform border border-blue-200">
+        <div class="text-blue-600 text-2xl mb-2">⚙️</div>
+        <span class="text-blue-800 font-semibold text-sm">관리자</span>
+      </a>
+      {% else %}
+      <a href="/history"
+         class="bg-gradient-to-br from-purple-100 to-pink-100 p-4 rounded-xl text-center active:scale-95 transition-transform border border-purple-200">
+        <div class="text-purple-600 text-2xl mb-2">📊</div>
+        <span class="text-purple-800 font-semibold text-sm">내 기록</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
