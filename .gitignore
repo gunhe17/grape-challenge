@@ -1,26 +1,28 @@
 # Python
 __pycache__/
-*.pyc
-.venv/
-venv/
-.env
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
 
-# Database
-*.db
-database/*.db
+# Virtual Environment
+.venv/
 
 # IDE
 .vscode/
 .idea/
 
-# Git
-.github
+# Environment variables
+.env
+.env.prod
+
+# Database
+*.db
+*.sqlite3
+db.json
 
 # OS
 .DS_Store
-
-# Claude
-.claude/
-
-# Logs
-*.log
+Thumbs.db

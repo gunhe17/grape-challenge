@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(PYTHONPATH=. python test/api/test_api.py)",
+      "Bash(export PYTHONPATH=.)",
+      "Bash(python test/api/test_api.py)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

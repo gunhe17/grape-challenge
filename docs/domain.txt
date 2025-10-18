@@ -1,0 +1,395 @@
+도메인 레이어 구조
+
+개요
+- DDD 원칙 기반 (값 객체, 엔티티, 리포지토리)
+- 모든 도메인 객체는 불변 (frozen dataclass)
+- grapechallenge/domain/common에 공통 클래스 위치
+
+공통 클래스 (grapechallenge/domain/common)
+
+1. DomainError (error.py)
+   - 모든 도메인 에러의 베이스 클래스
+   - 속성: msg (메시지), code (HTTP 상태 코드)
+   - __trace_back__() 메서드로 스택 추적
+
+   검증 에러:
+   - InvalidTypeError: 유효하지 않은 자료형
+   - InvalidFormatError: 유효하지 않은 형식
+   - InvalidLengthError: 유효하지 않은 길이
+   - DisallowedValueError: 허용되지 않은 값
+   - EmptyValueError: 비어있을 수 없는 값
+   - FrozenAttributeError: frozen 속성 수정 시도
+
+   데이터베이스 에러:
+   - DatabaseError: 베이스 클래스
+   - NotInsertedError: 생성 실패
+   - NotEditedError: 수정 실패
+   - NotFoundError: 조회 실패
+
+2. Repo (repo.py)
+   - SQLAlchemy 기반 리포지토리 베이스 클래스
+   - 모든 메서드는 classmethod, async
+   - 파라미터: session, model_class, data/id
+   - 반환값: SQLAlchemy Model 인스턴스 (dict 아님)
+
+   메서드:
+   - insert(session, model_class, data): 단일 레코드 삽입, Model 인스턴스 반환
+   - edit(session, model_class, data, id): 레코드 수정, Model 인스턴스 반환
+   - find(session, model_class, id): id로 조회, Model 인스턴스 반환
+   - find_filtered_by_fields(session, model_class, **kwargs): 필드 조건 조회, Model 인스턴스 반환
+
+   특징:
+   - SQLAlchemy Model 인스턴스를 그대로 반환 (dict 변환 안함)
+   - 에러 발생 시 도메인 에러로 변환
+   - flush() 사용으로 트랜잭션 내에서 id 즉시 획득
+   - edit 시 updated_at 자동 설정
+
+
+도메인 객체 구조
+
+1. 값 객체 (Value Object)
+   - pydantic.dataclasses의 @dataclass(frozen=True) 사용
+   - 프라이빗 속성: _value
+   - 팩토리 메서드: from_str(), from_dict(), new()
+   - 쿼리 메서드: to_str(), to_dict()
+   - 검증 실패시 DomainError 발생
+
+   예시 (grapechallenge/domain/user/cell.py):
+   from pydantic.dataclasses import dataclass
+
+   from grapechallenge.domain.common.error import (
+       InvalidTypeError,
+       EmptyValueError,
+   )
+
+
+   @dataclass(frozen=True)
+   class Cell:
+       _value: str
+
+       # #
+       # factory
+
+       @classmethod
+       def from_str(cls, value) -> "Cell":
+           if not isinstance(value, str):
+               raise InvalidTypeError(target=cls.__name__, valid_type=str)
+
+           if value == "":
+               raise EmptyValueError(target=cls.__name__)
+
+           return cls(_value=value)
+
+       # #
+       # query
+
+       def to_str(self) -> str:
+           return self._value
+
+
+2. 엔티티 (Entity)
+   - pydantic.dataclasses의 @dataclass(frozen=True) 사용
+   - 값 객체들을 포함하는 불변 애그리게이트
+   - 팩토리 메서드: new(), from_dict()
+   - 쿼리 메서드: to_dict()
+   - 업데이트 메서드는 새 인스턴스 반환 (함수형 스타일)
+
+   예시 (grapechallenge/domain/user/user.py):
+   from pydantic.dataclasses import dataclass
+   from pydantic import ValidationError
+
+   from grapechallenge.domain.common.error import InvalidTypeError
+   from grapechallenge.domain.user import (
+       Cell,
+       Name,
+   )
+
+
+   @dataclass(frozen=True)
+   class User:
+       cell: Cell
+       name: Name
+
+       # #
+       # factory
+
+       @classmethod
+       def new(
+           cls,
+           *,
+           cell: Cell,
+           name: Name,
+       ) -> "User":
+           try:
+               return cls(
+                   cell=cell,
+                   name=name
+               )
+           except ValidationError as e:
+               raise InvalidTypeError.from_pydantic(e)
+
+       @classmethod
+       def from_dict(cls, data: dict) -> "User":
+           return cls.new(
+               cell=Cell.from_str(
+                   data.get("cell", None)
+               ),
+               name=Name.from_str(
+                   data.get("name", None)
+               ),
+           )
+
+       # #
+       # query
+
+       def to_dict(self) -> dict:
+           return {
+               "cell": self.cell.to_str(),
+               "name": self.name.to_str(),
+           }
+
+       # #
+       # update
+
+       def update_cell(self, cell: Cell) -> "User":
+           return User.new(
+               cell=cell,
+               name=self.name
+           )
+
+       def update_name(self, name: Name) -> "User":
+           return User.new(
+               cell=self.cell,
+               name=name
+           )
+
+
+3. 리포지토리 (Repository)
+   - Repo 베이스 클래스 상속
+   - __table__ 속성으로 테이블명 정의
+   - SQLAlchemy Model 클래스를 repo 파일 내부에 정의
+   - 비동기 메서드: create(), update(), get_by_id() + 커스텀 조회 메서드
+   - _model() 메서드로 엔티티를 dict로 변환
+   - summary() 메서드로 메타데이터만 반환
+   - 메타데이터(id, created_at, updated_at) + 도메인 엔티티 보유
+
+   예시 (grapechallenge/domain/user/repo_user.py):
+   from datetime import datetime
+   from typing import Optional
+   from sqlalchemy import Column, Integer, String, DateTime
+   from sqlalchemy.ext.asyncio import AsyncSession
+
+   from grapechallenge.database.database import Base
+   from grapechallenge.domain.common.repo import Repo
+   from grapechallenge.domain.user import User
+
+
+   class UserModel(Base):
+       __tablename__ = "users"
+
+       id = Column(Integer, primary_key=True, autoincrement=True)
+       cell = Column(String(100), nullable=False)
+       name = Column(String(100), nullable=False)
+       created_at = Column(DateTime, default=datetime.now, nullable=False)
+       updated_at = Column(DateTime, default=None, nullable=True)
+
+
+   class RepoUser(Repo):
+       __table__: str = "users"
+
+       def __init__(
+           self,
+           id: int,
+           user: User,
+           created_at: datetime,
+           updated_at: Optional[datetime],
+       ):
+           self.id = id
+           self.user = user
+           self.created_at = created_at
+           self.updated_at = updated_at
+
+       # #
+       # helper
+
+       @classmethod
+       def _model(
+           cls,
+           *,
+           user: User,
+           id: Optional[int] = None,
+           created_at: Optional[datetime] = None,
+           updated_at: Optional[datetime] = None,
+       ) -> dict:
+           return {
+               **({"id": id} if id else {}),
+               **(user.to_dict()),
+               "created_at": created_at or datetime.now(),
+               "updated_at": updated_at,
+           }
+
+       def summary(self) -> dict:
+           return {
+               "id": self.id,
+               "created_at": self.created_at.isoformat(),
+               "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+           }
+
+       # #
+       # command
+
+       @classmethod
+       async def create(
+           cls,
+           session: AsyncSession,
+           user: User
+       ) -> "RepoUser":
+
+           created = await cls.insert(
+               session=session,
+               model_class=UserModel,
+               data=cls._model(user=user)
+           )
+
+           return cls(
+               id=created.id,
+               user=User.from_dict({
+                   "cell": created.cell,
+                   "name": created.name
+               }),
+               created_at=created.created_at,
+               updated_at=created.updated_at,
+           )
+
+       @classmethod
+       async def update(
+           cls,
+           session: AsyncSession,
+           user: User,
+           id: int
+       ) -> "RepoUser":
+
+           updated = await cls.edit(
+               session=session,
+               model_class=UserModel,
+               data=user.to_dict(),
+               id=id
+           )
+
+           return cls(
+               id=updated.id,
+               user=User.from_dict({
+                   "cell": updated.cell,
+                   "name": updated.name
+               }),
+               created_at=updated.created_at,
+               updated_at=updated.updated_at,
+           )
+
+       # #
+       # query
+
+       @classmethod
+       async def get_by_id(
+           cls,
+           session: AsyncSession,
+           id: int
+       ) -> "RepoUser":
+
+           found = await cls.find(
+               session=session,
+               model_class=UserModel,
+               id=id
+           )
+
+           return cls(
+               id=found.id,
+               user=User.from_dict({
+                   "cell": found.cell,
+                   "name": found.name
+               }),
+               created_at=found.created_at,
+               updated_at=found.updated_at,
+           )
+
+       @classmethod
+       async def get_by_cell_and_name(
+           cls,
+           session: AsyncSession,
+           cell: str,
+           name: str
+       ) -> "RepoUser":
+
+           found = await cls.find_filtered_by_fields(
+               session=session,
+               model_class=UserModel,
+               cell=cell,
+               name=name
+           )
+
+           return cls(
+               id=found.id,
+               user=User.from_dict({
+                   "cell": found.cell,
+                   "name": found.name
+               }),
+               created_at=found.created_at,
+               updated_at=found.updated_at,
+           )
+
+
+스타일 가이드
+
+네이밍
+- 프라이빗 속성: _value
+- 팩토리 메서드: from_str(), from_dict(), new()
+- 쿼리 메서드: to_str(), to_dict()
+- 업데이트 메서드: update_{필드명}()
+- 내부 헬퍼: _model()
+
+에러 처리
+- 팩토리 메서드에서 검증
+- 구체적인 DomainError 발생 (InvalidTypeError, EmptyValueError 등)
+- pydantic의 ValidationError는 InvalidTypeError.from_pydantic()으로 변환
+- 데이터베이스 에러는 Repo에서 자동 처리
+
+불변성
+- @dataclass(frozen=True) 사용
+- 업데이트 메서드는 새 인스턴스 반환
+- setter나 mutation 없음
+
+타입 힌트
+- 모든 메서드에 반환 타입 명시
+- nullable 필드는 Optional[] 사용
+- forward reference는 문자열 사용 ("User")
+
+팩토리 패턴
+- new() 메서드는 키워드 전용 인자 (* 사용)
+- 입력 타입과 값 검증
+- 새 인스턴스 반환 또는 에러 발생
+
+주석 스타일
+- 섹션 구분자: # # (두 개의 #와 공백)
+- 섹션명: # factory, # query, # update, # command, # helper
+
+메서드 파라미터 스타일
+- 파라미터가 많을 경우 줄바꿈
+- 각 파라미터는 별도 라인
+- 닫는 괄호는 별도 라인 또는 같은 라인
+
+베이스 클래스 메서드 호출 시
+- 결과를 간결한 변수명에 저장 (created, updated, found)
+- 호출 파라미터는 줄바꿈하여 가독성 확보
+
+모듈 구조
+grapechallenge/
+  domain/
+    common/
+      error.py          DomainError, DatabaseError 정의
+      repo.py           Repo 베이스 클래스
+    user/
+      __init__.py       Cell, Name, User, RepoUser export
+      cell.py           Cell 값 객체
+      name.py           Name 값 객체
+      user.py           User 엔티티
+      repo_user.py      UserModel + RepoUser 리포지토리

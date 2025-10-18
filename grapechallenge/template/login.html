@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>말씀 나무 기르기 - 로그인</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full overflow-hidden">
+  <div class="flex min-h-full items-center justify-center px-8 sm:px-12 py-12 bg-white">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-8">
+        <span class="text-4xl">🌱</span>
+        <h2 class="mt-4 text-3xl font-bold text-gray-900">말씀 나무 기르기</h2>
+      </div>
+
+      <form id="login-form" class="space-y-6">
+        <!-- Error message container -->
+        <div id="error-message" class="hidden rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 border border-red-200">
+          <p id="error-text"></p>
+        </div>
+
+        <div>
+          <label for="cell" class="block text-sm font-medium text-gray-900">셀</label>
+          <input id="cell" name="cell" type="text" required placeholder="셀 이름을 입력하세요" class="mt-2 block w-full rounded-lg border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500">
+        </div>
+
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-900">이름</label>
+          <input id="name" name="name" type="text" required placeholder="이름을 입력하세요" class="mt-2 block w-full rounded-lg border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-orange-500">
+        </div>
+
+        <button type="submit" class="w-full rounded-lg bg-orange-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-400">
+          로그인
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // 페이지 로드 시 로그인 상태 확인
+    async function checkLoginStatus() {
+      try {
+        const response = await fetch('/fruit/in-progress');
+        const data = await response.json();
+
+        // 응답이 성공이고 실제 과일 데이터가 있으면 로그인된 상태
+        if (response.ok && data.fruit && data.fruit.fruit_id) {
+          // 로그인되어 있으면 home으로 리다이렉트
+          window.location.href = '/home';
+        }
+      } catch (error) {
+        // 로그인되지 않은 상태이므로 login 페이지 유지
+        console.log('Not logged in, staying on login page');
+      }
+    }
+
+    // 페이지 로드 시 로그인 상태 확인
+    checkLoginStatus();
+
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+
+    // 에러 메시지 표시 함수
+    function showError(message) {
+      errorText.textContent = message;
+      errorMessage.classList.remove('hidden');
+    }
+
+    // 에러 메시지 숨김 함수
+    function hideError() {
+      errorMessage.classList.add('hidden');
+      errorText.textContent = '';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // 이전 에러 메시지 숨김
+      hideError();
+
+      const cell = document.getElementById('cell').value;
+      const name = document.getElementById('name').value;
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cell, name }),
+          credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        console.log('Login response:', data);
+        console.log('Response headers:', response.headers);
+        console.log('Cookies after login:', document.cookie);
+
+        if (response.ok && data.user_id) {
+          // 쿠키가 설정될 시간을 주기 위해 약간의 지연
+          setTimeout(() => {
+            console.log('Cookies before redirect:', document.cookie);
+            window.location.href = '/home';
+          }, 100);
+        } else {
+          // 서버에서 받은 메시지 또는 기본 메시지 표시
+          const message = data.message || '로그인에 실패했습니다.';
+          showError(message);
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    });
+  </script>
+</body>
+</html>

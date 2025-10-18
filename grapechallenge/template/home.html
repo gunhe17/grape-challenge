@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>말씀 나무 기르기</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+  <div class="bg-white h-full flex flex-col">
+    <header class="flex-none bg-white z-50">
+      <nav aria-label="Global" class="flex items-center justify-between p-6 lg:px-8">
+        <div class="flex lg:flex-1">
+          <a href="/home" class="-m-1.5 p-1.5 cursor-pointer">
+            <span class="text-xl font-bold text-black">말씀 나무 기르기</span>
+          </a>
+        </div>
+        <div class="flex">
+          <button type="button" command="show-modal" commandfor="mobile-menu" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
+            <span class="sr-only">메뉴 열기</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
+              <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </nav>
+      <el-dialog>
+        <dialog id="mobile-menu" class="backdrop:bg-transparent">
+          <div tabindex="0" class="fixed inset-0 focus:outline-none">
+            <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 animate-slide-in">
+              <div class="flex items-center justify-between">
+                <a href="/home" class="-m-1.5 p-1.5 cursor-pointer">
+                  <span class="text-xl font-bold text-black">말씀 나무 기르기</span>
+                </a>
+                <button type="button" command="close" commandfor="mobile-menu" class="-m-2.5 rounded-md p-2.5 text-gray-700 hover:bg-gray-100 transition-colors">
+                  <span class="sr-only">메뉴 닫기</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
+                    <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <div class="mt-6 flow-root">
+                <div class="-my-6 divide-y divide-gray-500/10">
+                  <div class="space-y-2 py-6">
+                    <a href="/grove" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200">수확물</a>
+                    <a href="#" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200">문의하기</a>
+                    <button id="logout-btn" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 w-full text-left">로그아웃</button>
+                  </div>
+                </div>
+              </div>
+            </el-dialog-panel>
+          </div>
+        </dialog>
+      </el-dialog>
+    </header>
+
+    <div class="relative isolate flex-1 overflow-y-auto">
+      <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+        <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
+      </div>
+
+      <div class="mx-auto max-w-7xl px-6 lg:px-8 py-8 sm:py-12">
+        <div class="flex flex-col items-center">
+          <!-- Progress Section -->
+          <div class="relative mb-16 sm:mb-20">
+            <svg class="w-56 h-56 sm:w-72 sm:h-72 -rotate-90" viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="85" fill="none" stroke="#f3f4f6" stroke-width="10"/>
+              <circle id="progress-circle" cx="100" cy="100" r="85" fill="none" stroke="#ff6b35" stroke-width="10"
+                      stroke-dasharray="534.07"
+                      stroke-dashoffset="381.48"
+                      stroke-linecap="round"
+                      class="transition-all duration-500 ease-in-out"/>
+            </svg>
+
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full flex items-center justify-center">
+                <span id="stage-emoji" class="text-6xl sm:text-7xl">🌱</span>
+              </div>
+            </div>
+
+            <div class="absolute -bottom-8 left-1/2 -translate-x-1/2">
+              <p id="stage-text" class="text-sm text-gray-600 font-medium">1단계 · 씨앗</p>
+            </div>
+          </div>
+
+          <!-- Mission Section -->
+          <div id="mission-container" class="w-full max-w-lg space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- 하단 여백: 마지막 요소가 화면 중앙까지 스크롤될 수 있도록 -->
+      <div class="h-[50vh]"></div>
+
+      <div aria-hidden="true" class="absolute inset-x-0 bottom-0 -z-10 transform-gpu overflow-hidden blur-3xl pointer-events-none">
+        <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%+36rem)] sm:w-288.75"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================
+    // 상수 및 설정
+    // ========================
+    const STAGE_NAMES = [
+      { level: 1, name: '씨앗', status: 'FIRST_STATUS' },
+      { level: 2, name: '새싹', status: 'SECOND_STATUS' },
+      { level: 3, name: '묘목', status: 'THIRD_STATUS' },
+      { level: 4, name: '어린나무', status: 'FOURTH_STATUS' },
+      { level: 5, name: '큰나무', status: 'FIFTH_STATUS' },
+      { level: 6, name: '꽃', status: 'SIXTH_STATUS' },
+      { level: 7, name: '열매', status: 'SEVENTH_STATUS' }
+    ];
+
+    const CIRCLE_CIRCUMFERENCE = 534.07;
+    const MAX_PROGRESS = 98;
+    const SEVENTH_STATUS = 'SEVENTH_STATUS';
+
+    // ========================
+    // 전역 상태
+    // ========================
+    let currentFruit = null;
+    let currentMissions = [];
+
+    // ========================
+    // API 호출 함수
+    // ========================
+
+    async function fetchCurrentFruit() {
+      try {
+        const response = await fetch('/fruit/in-progress');
+        const data = await response.json();
+
+        if (response.ok && data.fruit && data.fruit.fruit_id) {
+          currentFruit = data.fruit;
+          currentMissions = data.missions || [];
+          return data.fruit;
+        }
+
+        currentFruit = null;
+        currentMissions = [];
+        return null;
+      } catch (error) {
+        console.error('과일 조회 오류:', error);
+        currentFruit = null;
+        currentMissions = [];
+        return null;
+      }
+    }
+
+    async function createNewFruit() {
+      try {
+        const response = await fetch('/fruit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        const data = await response.json();
+        return (response.ok && data.id) ? data : null;
+      } catch (error) {
+        console.error('과일 생성 오류:', error);
+        return null;
+      }
+    }
+
+    async function completeMission(fruitId, missionName) {
+      try {
+        const response = await fetch('/mission/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fruit_id: fruitId, name: missionName })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.id) {
+          await fetchCurrentFruit();
+          return data;
+        }
+        return null;
+      } catch (error) {
+        console.error('미션 완료 오류:', error);
+        return null;
+      }
+    }
+
+    // ========================
+    // UI 헬퍼 함수
+    // ========================
+
+    function getStageInfo(status) {
+      return STAGE_NAMES.find(s => s.status === status) || STAGE_NAMES[0];
+    }
+
+    function getStatusImage(fruit) {
+      if (!fruit) return '🌱';
+
+      const statusMap = {
+        'FIRST_STATUS': fruit.first_status,
+        'SECOND_STATUS': fruit.second_status,
+        'THIRD_STATUS': fruit.third_status,
+        'FOURTH_STATUS': fruit.fourth_status,
+        'FIFTH_STATUS': fruit.fifth_status,
+        'SIXTH_STATUS': fruit.sixth_status,
+        'SEVENTH_STATUS': fruit.seventh_status
+      };
+
+      return statusMap[fruit.status] || '🌱';
+    }
+
+    function isImageUrl(str) {
+      return str && (str.startsWith('http://') || str.startsWith('https://') || str.startsWith('/'));
+    }
+
+    function calculateProgress(status) {
+      const index = STAGE_NAMES.findIndex(s => s.status === status);
+      if (index === -1) return 0;
+      return (index / (STAGE_NAMES.length - 1)) * MAX_PROGRESS;
+    }
+
+    function updateUI() {
+      if (!currentFruit) {
+        updateProgressCircle(0);
+        updateStageDisplay(null, { level: 0, name: '씨앗을 심어주세요' });
+        updateMissions(null);
+        return;
+      }
+
+      const stageInfo = getStageInfo(currentFruit.status);
+      const progress = calculateProgress(currentFruit.status);
+
+      updateProgressCircle(progress);
+      updateStageDisplay(currentFruit, stageInfo);
+      updateMissions(currentFruit);
+    }
+
+    function updateProgressCircle(progress) {
+      const offset = CIRCLE_CIRCUMFERENCE - (progress / 100) * CIRCLE_CIRCUMFERENCE;
+      document.getElementById('progress-circle').style.strokeDashoffset = offset;
+    }
+
+    function updateStageDisplay(fruit, stageInfo) {
+      const emojiElement = document.getElementById('stage-emoji');
+      const stageText = `${stageInfo.level}단계 · ${stageInfo.name}`;
+
+      if (!fruit) {
+        emojiElement.textContent = '';
+        document.getElementById('stage-text').textContent = stageText;
+        return;
+      }
+
+      const image = getStatusImage(fruit);
+
+      if (isImageUrl(image)) {
+        emojiElement.innerHTML = `<img src="${image}" alt="fruit" class="w-full h-full object-contain">`;
+      } else {
+        emojiElement.textContent = image;
+      }
+
+      document.getElementById('stage-text').textContent = stageText;
+    }
+
+    function updateMissions(fruit) {
+      const container = document.getElementById('mission-container');
+      container.innerHTML = '';
+
+      if (!fruit) {
+        container.appendChild(createPlantSeedCard());
+        return;
+      }
+
+      if (fruit.status === SEVENTH_STATUS) {
+        container.appendChild(createHarvestNotificationCard());
+      }
+
+      if (currentMissions.length > 0) {
+        currentMissions.forEach(mission => {
+          container.appendChild(createDailyMissionCard(mission));
+        });
+      } else {
+        container.appendChild(createDailyMissionCard(null));
+      }
+
+      // 테스트용 미션 추가 (항상 마지막에 표시)
+      container.appendChild(createTestMissionCard());
+    }
+
+    function createPlantSeedCard() {
+      const card = document.createElement('div');
+      card.className = 'relative rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 px-8 py-6 shadow-sm outline outline-2 -outline-offset-1 outline-green-300';
+      card.innerHTML = `
+        <div class="flex items-center justify-between gap-x-6">
+          <div class="flex-1 min-w-0">
+            <p class="text-base/7 font-semibold tracking-tight text-gray-900">🌱 새로운 씨앗 심기</p>
+            <p class="mt-1 text-sm/6 text-gray-600">새로운 나무를 시작하세요</p>
+          </div>
+          <div class="flex-none">
+            <button class="plant-seed-btn rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-green-500">
+              시작하기
+            </button>
+          </div>
+        </div>
+      `;
+      card.querySelector('.plant-seed-btn').addEventListener('click', handlePlantSeed);
+      return card;
+    }
+
+    function createHarvestNotificationCard() {
+      const card = document.createElement('div');
+      card.className = 'relative rounded-2xl bg-gradient-to-br from-yellow-50 to-orange-50 px-8 py-6 mb-4 shadow-sm outline outline-2 -outline-offset-1 outline-yellow-300';
+      card.innerHTML = `
+        <div class="flex items-center gap-x-4">
+          <div class="flex-none text-3xl">🎉</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-base/7 font-semibold tracking-tight text-gray-900">과일이 완성되었습니다!</p>
+            <p class="mt-1 text-sm/6 text-gray-600">미션을 한 번 더 완료하면 과일을 수확할 수 있어요</p>
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
+    function createDailyMissionCard(mission) {
+      const missionName = mission?.name || '오늘의 미션';
+      const missionContent = mission?.content || '말씀 한 장 읽기';
+      const canComplete = mission?.can_complete ?? true;
+
+      const buttonDisabled = canComplete ? '' : 'disabled';
+      const buttonClass = canComplete
+        ? 'rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-orange-400'
+        : 'rounded-lg bg-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-500 shadow-xs cursor-not-allowed';
+      const buttonText = canComplete ? '완료' : '완료됨';
+
+      const card = document.createElement('div');
+      card.className = 'relative rounded-2xl bg-white px-8 py-6 mb-4 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-200';
+      card.innerHTML = `
+        <div class="flex items-center justify-between gap-x-6">
+          <div class="flex-1 min-w-0">
+            <p class="text-base/7 font-semibold tracking-tight text-gray-900">${missionName}</p>
+            <p class="mt-1 text-sm/6 text-gray-600">${missionContent}</p>
+            ${!canComplete ? '<p class="mt-1 text-xs text-orange-600">오늘은 이미 이 미션을 완료했습니다</p>' : ''}
+          </div>
+          <div class="flex-none">
+            <button class="complete-mission-btn ${buttonClass}" ${buttonDisabled} data-mission-name="${missionName}">
+              ${buttonText}
+            </button>
+          </div>
+        </div>
+      `;
+
+      if (canComplete) {
+        card.querySelector('.complete-mission-btn').addEventListener('click', handleCompleteMission);
+      }
+      return card;
+    }
+
+    function createTestMissionCard() {
+      const card = document.createElement('div');
+      card.className = 'relative rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 px-8 py-6 mb-4 shadow-sm outline outline-2 -outline-offset-1 outline-purple-300';
+      card.innerHTML = `
+        <div class="flex items-center justify-between gap-x-6">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-x-2">
+              <p class="text-base/7 font-semibold tracking-tight text-gray-900">🧪 테스트 미션 (말씀 읽기)</p>
+              <span class="inline-flex items-center rounded-md bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700">TEST</span>
+            </div>
+            <p class="mt-1 text-sm/6 text-gray-600">테스트용 미션 - 제한 없이 반복 가능</p>
+            <p class="mt-1 text-xs text-purple-600">⚠️ 개발/테스트 전용 미션입니다</p>
+          </div>
+          <div class="flex-none">
+            <button class="test-mission-btn rounded-lg bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-purple-400">
+              완료
+            </button>
+          </div>
+        </div>
+      `;
+      card.querySelector('.test-mission-btn').addEventListener('click', handleTestMission);
+      return card;
+    }
+
+    // ========================
+    // 이벤트 핸들러
+    // ========================
+
+    async function handleCompleteMission(event) {
+      const btn = event.target;
+      if (!currentFruit) return;
+
+      const missionName = btn.getAttribute('data-mission-name');
+      const wasSeventhStatus = currentFruit.status === SEVENTH_STATUS;
+
+      btn.disabled = true;
+      btn.textContent = '처리중...';
+
+      const result = await completeMission(currentFruit.fruit_id, missionName);
+
+      if (result) {
+        if (wasSeventhStatus) {
+          btn.textContent = '수확 완료! 🎉';
+          setTimeout(updateUI, 1500);
+        } else {
+          btn.textContent = '완료됨!';
+          updateUI();
+          setTimeout(() => {
+            btn.textContent = '완료';
+            btn.disabled = false;
+          }, 1000);
+        }
+      } else {
+        alert('미션 완료 중 오류가 발생했습니다.');
+        btn.textContent = '완료';
+        btn.disabled = false;
+      }
+    }
+
+    async function handlePlantSeed(event) {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '처리중...';
+
+      const result = await createNewFruit();
+
+      if (result) {
+        btn.textContent = '시작됨!';
+        await fetchCurrentFruit();
+        updateUI();
+      } else {
+        alert('씨앗 심기 중 오류가 발생했습니다.');
+        btn.textContent = '시작하기';
+        btn.disabled = false;
+      }
+    }
+
+    async function handleTestMission(event) {
+      const btn = event.target;
+      if (!currentFruit) return;
+
+      const wasSeventhStatus = currentFruit.status === SEVENTH_STATUS;
+
+      btn.disabled = true;
+      btn.textContent = '처리중...';
+
+      const result = await completeMission(currentFruit.fruit_id, '말씀 읽기');
+
+      if (result) {
+        if (wasSeventhStatus) {
+          btn.textContent = '수확 완료! 🎉';
+          setTimeout(updateUI, 1500);
+        } else {
+          btn.textContent = '완료됨!';
+          updateUI();
+          setTimeout(() => {
+            btn.textContent = '완료';
+            btn.disabled = false;
+          }, 1000);
+        }
+      } else {
+        alert('테스트 미션 완료 중 오류가 발생했습니다.');
+        btn.textContent = '완료';
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', async function() {
+      if (!confirm('로그아웃 하시겠습니까?')) return;
+
+      try {
+        await fetch('/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        window.location.href = '/login';
+      }
+    });
+
+    // ========================
+    // 초기화
+    // ========================
+    document.addEventListener('DOMContentLoaded', async function() {
+      await fetchCurrentFruit();
+      updateUI();
+    });
+  </script>
+</body>
+</html>
