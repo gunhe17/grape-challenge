@@ -13,10 +13,21 @@ POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev_password}
 POSTGRES_DB=${POSTGRES_DB:-grape_dev}
 
 # Check if PostgreSQL is running
-if ! pg_isready -h localhost -p 5432 > /dev/null 2>&1; then
+PG_ISREADY="/opt/homebrew/opt/postgresql@15/bin/pg_isready"
+if ! $PG_ISREADY -h localhost -p 5432 > /dev/null 2>&1; then
     echo "Starting PostgreSQL..."
     brew services start postgresql@15
-    sleep 2
+    MAX_RETRIES=30
+    RETRY_COUNT=0
+    until $PG_ISREADY -h localhost -p 5432 > /dev/null 2>&1 || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+        echo "Waiting for PostgreSQL to be ready..."
+        sleep 1
+        RETRY_COUNT=$((RETRY_COUNT+1))
+    done
+    if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+        echo "Error: PostgreSQL failed to start after $MAX_RETRIES attempts"
+        exit 1
+    fi
 fi
 
 # Create user if not exists

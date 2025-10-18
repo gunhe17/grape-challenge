@@ -1,8 +1,10 @@
 fastapi
 uvicorn
 jinja2
+python-dotenv
 
 sqlalchemy
 asyncpg
 greenlet
 pydantic
+httpx

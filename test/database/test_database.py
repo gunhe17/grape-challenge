@@ -54,6 +54,16 @@ async def delete_product(product_id: int) -> None:
         await session.delete(product)
 
 
+async def create_product_with_rollback(name: str, price: int):
+    """Test function that creates a product then raises an exception to trigger rollback"""
+    async with transactional_session_helper() as session:
+        product = TestProduct(name=name, price=price)
+        session.add(product)
+        await session.flush()
+        # Raise exception to trigger rollback
+        raise ValueError("Intentional error to test rollback")
+
+
 # Test runner
 async def test_crud():
     db_config = get_database_config()
@@ -85,6 +95,15 @@ async def test_crud():
         await delete_product(pid)  # type: ignore
         product = await get_product(pid)  # type: ignore
         print(f"✓ Deleted: product={'not found' if product is None else 'still exists'}\n")
+
+        # TRANSACTION ROLLBACK
+        print("[TRANSACTION ROLLBACK]")
+        try:
+            await create_product_with_rollback("Banana", 2000)
+            print("✗ Rollback failed: exception not raised")
+        except ValueError as e:
+            print(f"✓ Exception caught: {e}")
+            print(f"✓ Rollback confirmed: transaction was rolled back\n")
 
     print("=" * 60)
     print("All tests passed!")

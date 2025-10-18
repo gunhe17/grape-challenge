@@ -6,6 +6,22 @@
   <title>말씀 나무 기르기 - 열매 숲</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
   <script>
     function toggleView(view) {
       const gridView = document.getElementById('grid-view');
@@ -36,11 +52,11 @@
     <header class="absolute inset-x-0 top-0 z-50 bg-white">
       <nav aria-label="Global" class="flex items-center justify-between p-6 lg:px-8">
         <div class="flex lg:flex-1">
-          <a href="#" class="-m-1.5 p-1.5">
+          <a href="/home" class="-m-1.5 p-1.5 cursor-pointer">
             <span class="text-xl font-bold text-black">말씀 나무 기르기</span>
           </a>
         </div>
-        <div class="flex lg:hidden">
+        <div class="flex">
           <button type="button" command="show-modal" commandfor="mobile-menu" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
             <span class="sr-only">메뉴 열기</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
@@ -48,20 +64,16 @@
             </svg>
           </button>
         </div>
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-          <a href="#" class="text-sm/6 font-semibold text-gray-900 hover:text-orange-600 transition-colors">설정</a>
-          <a href="#" class="text-sm/6 font-semibold text-gray-900 hover:text-orange-600 transition-colors">문의하기</a>
-        </div>
       </nav>
       <el-dialog>
-        <dialog id="mobile-menu" class="backdrop:bg-transparent lg:hidden">
+        <dialog id="mobile-menu" class="backdrop:bg-transparent">
           <div tabindex="0" class="fixed inset-0 focus:outline-none">
-            <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+            <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 animate-slide-in">
               <div class="flex items-center justify-between">
-                <a href="#" class="-m-1.5 p-1.5">
+                <a href="/home" class="-m-1.5 p-1.5 cursor-pointer">
                   <span class="text-xl font-bold text-black">말씀 나무 기르기</span>
                 </a>
-                <button type="button" command="close" commandfor="mobile-menu" class="-m-2.5 rounded-md p-2.5 text-gray-700">
+                <button type="button" command="close" commandfor="mobile-menu" class="-m-2.5 rounded-md p-2.5 text-gray-700 hover:bg-gray-100 transition-colors">
                   <span class="sr-only">메뉴 닫기</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
                     <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
@@ -71,8 +83,9 @@
               <div class="mt-6 flow-root">
                 <div class="-my-6 divide-y divide-gray-500/10">
                   <div class="space-y-2 py-6">
-                    <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 transition-colors">설정</a>
-                    <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 transition-colors">문의하기</a>
+                    <a href="/grove" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200">수확물</a>
+                    <a href="#" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200">문의하기</a>
+                    <button id="logout-btn" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 w-full text-left">로그아웃</button>
                   </div>
                 </div>
               </div>
@@ -117,112 +130,16 @@
 
         <!-- Grid View -->
         <div id="grid-view" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 px-2">
-          <!-- Completed Fruit 1 -->
-          <div class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md">
+          <!-- In Progress Fruit (Current Tree) -->
+          <div id="current-tree-card" class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-orange-200 hover:outline-orange-300 transition-all hover:shadow-md">
             <div class="flex items-start justify-between">
               <div class="flex-1">
                 <div class="flex items-center gap-x-3">
-                  <span class="text-5xl mr-2">🍎</span>
+                  <span id="current-tree-emoji" class="text-5xl mr-2">🌱</span>
                   <div>
-                    <p class="text-sm font-semibold text-gray-900">사과</p>
-                    <p class="text-xs text-gray-500">완성</p>
-                    <p class="text-xs text-gray-600">2025년 10월 1일 - 7일</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Completed Fruit 2 -->
-          <div class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-x-3">
-                  <span class="text-5xl mr-2">🍊</span>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">오렌지</p>
-                    <p class="text-xs text-gray-500">완성</p>
-                    <p class="text-xs text-gray-600">2025년 9월 24일 - 30일</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- In Progress Fruit -->
-          <div class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-orange-200 hover:outline-orange-300 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-x-3">
-                  <span class="text-5xl mr-2">🌱</span>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">포도</p>
-                    <p class="text-xs text-orange-600">진행중</p>
-                    <p class="text-xs text-gray-600">2025년 10월 8일 - 현재</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Completed Fruit 3 -->
-          <div class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-x-3">
-                  <span class="text-5xl mr-2">🍓</span>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">딸기</p>
-                    <p class="text-xs text-gray-500">완성</p>
-                    <p class="text-xs text-gray-600">2025년 9월 17일 - 23일</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Completed Fruit 4 -->
-          <div class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-x-3">
-                  <span class="text-5xl mr-2">🍑</span>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">복숭아</p>
-                    <p class="text-xs text-gray-500">완성</p>
-                    <p class="text-xs text-gray-600">2025년 9월 10일 - 16일</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Completed Fruit 5 -->
-          <div class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-x-3">
-                  <span class="text-5xl mr-2">🍇</span>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">청포도</p>
-                    <p class="text-xs text-gray-500">완성</p>
-                    <p class="text-xs text-gray-600">2025년 9월 3일 - 9일</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Completed Fruit 6 -->
-          <div class="relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-x-3">
-                  <span class="text-5xl mr-2">🍉</span>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">수박</p>
-                    <p class="text-xs text-gray-500">완성</p>
-                    <p class="text-xs text-gray-600">2025년 8월 27일 - 9월 2일</p>
+                    <p class="text-sm font-semibold text-gray-900">현재 나무</p>
+                    <p class="text-xs text-orange-600">진행중 <span id="current-tree-progress">0</span>%</p>
+                    <p id="current-tree-stage" class="text-xs text-gray-600">1단계 · 씨앗</p>
                   </div>
                 </div>
               </div>
@@ -243,16 +160,8 @@
 
               <!-- Fruits in Basket -->
               <div class="relative z-10 flex flex-wrap gap-4 justify-center items-center min-h-64 py-6">
-                <!-- Completed Fruits -->
-                <div class="text-6xl transform hover:scale-110 transition-transform cursor-pointer" title="사과 - 2025년 10월 1일 - 7일">🍎</div>
-                <div class="text-6xl transform hover:scale-110 transition-transform cursor-pointer" title="오렌지 - 2025년 9월 24일 - 30일">🍊</div>
-                <div class="text-6xl transform hover:scale-110 transition-transform cursor-pointer" title="딸기 - 2025년 9월 17일 - 23일">🍓</div>
-                <div class="text-6xl transform hover:scale-110 transition-transform cursor-pointer" title="복숭아 - 2025년 9월 10일 - 16일">🍑</div>
-                <div class="text-6xl transform hover:scale-110 transition-transform cursor-pointer" title="청포도 - 2025년 9월 3일 - 9일">🍇</div>
-                <div class="text-6xl transform hover:scale-110 transition-transform cursor-pointer" title="수박 - 2025년 8월 27일 - 9월 2일">🍉</div>
-
                 <!-- In Progress Fruit (smaller, growing) -->
-                <div class="text-4xl transform hover:scale-110 transition-transform cursor-pointer animate-pulse" title="포도 - 진행중">🌱</div>
+                <div id="current-tree-basket-emoji" class="text-4xl transform hover:scale-110 transition-transform cursor-pointer animate-pulse" title="현재 나무 - 진행중">🌱</div>
               </div>
 
               <!-- Basket Handle -->
@@ -269,5 +178,267 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // ========================
+    // 상수 및 설정
+    // ========================
+    const stageNames = [
+      { level: 1, name: '씨앗', status: 'FIRST_STATUS' },
+      { level: 2, name: '새싹', status: 'SECOND_STATUS' },
+      { level: 3, name: '묘목', status: 'THIRD_STATUS' },
+      { level: 4, name: '어린나무', status: 'FOURTH_STATUS' },
+      { level: 5, name: '큰나무', status: 'FIFTH_STATUS' },
+      { level: 6, name: '꽃', status: 'SIXTH_STATUS' },
+      { level: 7, name: '열매', status: 'SEVENTH_STATUS' }
+    ];
+
+    // ========================
+    // 전역 상태
+    // ========================
+    let currentFruit = null;
+    let completedFruits = [];
+
+    // ========================
+    // API 호출 함수
+    // ========================
+
+    // 현재 진행중인 과일 조회
+    async function fetchCurrentFruit() {
+      try {
+        const response = await fetch('/fruit/in-progress');
+        const data = await response.json();
+
+        if (response.ok && data.fruit && data.fruit.fruit_id) {
+          currentFruit = data.fruit;
+          return data.fruit;
+        }
+        currentFruit = null;
+        return null;
+      } catch (error) {
+        console.error('과일 조회 오류:', error);
+        currentFruit = null;
+        return null;
+      }
+    }
+
+    // 완료된 과일 목록 조회
+    async function fetchCompletedFruits() {
+      try {
+        const response = await fetch('/fruits/mine');
+        const data = await response.json();
+
+        if (response.ok && data.fruits) {
+          // COMPLETED 상태인 과일만 필터링
+          completedFruits = data.fruits.filter(f => f.status === 'COMPLETED');
+          return completedFruits;
+        }
+        completedFruits = [];
+        return [];
+      } catch (error) {
+        console.error('완료된 과일 조회 오류:', error);
+        completedFruits = [];
+        return [];
+      }
+    }
+
+    // ========================
+    // UI 헬퍼 함수
+    // ========================
+
+    // 상태로 단계 정보 찾기
+    function getStageInfo(status) {
+      return stageNames.find(s => s.status === status) || stageNames[0];
+    }
+
+    // 현재 상태의 이미지/이모지 가져오기
+    function getStatusImage(fruit) {
+      if (!fruit) return '🌱';
+
+      const statusMap = {
+        'FIRST_STATUS': fruit.first_status,
+        'SECOND_STATUS': fruit.second_status,
+        'THIRD_STATUS': fruit.third_status,
+        'FOURTH_STATUS': fruit.fourth_status,
+        'FIFTH_STATUS': fruit.fifth_status,
+        'SIXTH_STATUS': fruit.sixth_status,
+        'SEVENTH_STATUS': fruit.seventh_status
+      };
+
+      return statusMap[fruit.status] || '🌱';
+    }
+
+    // 이미지 URL인지 이모지인지 판단
+    function isImageUrl(str) {
+      return str && (str.startsWith('http://') || str.startsWith('https://') || str.startsWith('/'));
+    }
+
+    // 진행률 계산 (0-98)
+    function calculateProgress(status) {
+      const index = stageNames.findIndex(s => s.status === status);
+      if (index === -1) return 0;
+      return (index / (stageNames.length - 1)) * 98;
+    }
+
+    // 날짜 포맷팅
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}.${month}.${day}`;
+    }
+
+    // ========================
+    // UI 업데이트 함수
+    // ========================
+
+    // 현재 나무 상태 업데이트
+    function updateCurrentTree() {
+      if (!currentFruit) {
+        // 진행중인 과일이 없으면 카드 숨김
+        const card = document.getElementById('current-tree-card');
+        const basketEmoji = document.getElementById('current-tree-basket-emoji');
+        if (card) card.style.display = 'none';
+        if (basketEmoji) basketEmoji.style.display = 'none';
+        return;
+      }
+
+      const stageInfo = getStageInfo(currentFruit.status);
+      const progress = calculateProgress(currentFruit.status);
+      const image = getStatusImage(currentFruit);
+
+      // 그리드 뷰 업데이트
+      const emojiElement = document.getElementById('current-tree-emoji');
+      if (isImageUrl(image)) {
+        emojiElement.innerHTML = `<img src="${image}" alt="fruit" class="w-20 h-20 object-contain">`;
+      } else {
+        emojiElement.textContent = image;
+      }
+
+      document.getElementById('current-tree-progress').textContent = Math.round(progress);
+      document.getElementById('current-tree-stage').textContent = `${stageInfo.level}단계 · ${stageInfo.name}`;
+
+      // 바구니 뷰 업데이트
+      const basketEmojiElement = document.getElementById('current-tree-basket-emoji');
+      if (isImageUrl(image)) {
+        basketEmojiElement.innerHTML = `<img src="${image}" alt="fruit" class="w-16 h-16 object-contain">`;
+      } else {
+        basketEmojiElement.textContent = image;
+      }
+      basketEmojiElement.setAttribute('title', `현재 나무 - ${stageInfo.level}단계 ${stageInfo.name}`);
+
+      // 카드 표시
+      document.getElementById('current-tree-card').style.display = 'block';
+      basketEmojiElement.style.display = 'block';
+    }
+
+    // 완성된 과일들을 그리드에 렌더링
+    function renderCompletedFruits() {
+      const gridView = document.getElementById('grid-view');
+      const basketView = document.getElementById('basket-view').querySelector('.relative.z-10');
+
+      // 기존 완성된 과일 카드 제거 (현재 나무 카드는 유지)
+      const existingCards = gridView.querySelectorAll('.relative.rounded-2xl:not(#current-tree-card)');
+      existingCards.forEach(card => card.remove());
+
+      // 바구니 뷰의 기존 과일 제거 (현재 나무는 유지)
+      const existingBasketFruits = basketView.querySelectorAll('div:not(#current-tree-basket-emoji)');
+      existingBasketFruits.forEach(fruit => fruit.remove());
+
+      // 완성된 과일들을 역순으로 추가 (최신 것이 먼저)
+      [...completedFruits].reverse().forEach((fruit) => {
+        const image = fruit.seventh_status || '🍎';
+        const fruitName = fruit.template_name || '과일';
+        const displayDate = fruit.updated_at ? formatDate(fruit.updated_at) : '';
+
+        // 그리드 뷰 카드 생성
+        const card = document.createElement('div');
+        card.className = 'relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md';
+
+        const imageHtml = isImageUrl(image)
+          ? `<img src="${image}" alt="${fruitName}" class="w-20 h-20 object-contain mr-2">`
+          : `<span class="text-5xl mr-2">${image}</span>`;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-x-3">
+                ${imageHtml}
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">${fruitName}</p>
+                  <p class="text-xs text-green-600">완성</p>
+                  <p class="text-xs text-gray-600">${displayDate}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // 현재 나무 카드 앞에 삽입
+        const currentTreeCard = document.getElementById('current-tree-card');
+        gridView.insertBefore(card, currentTreeCard);
+
+        // 바구니 뷰에 과일 추가
+        const basketFruit = document.createElement('div');
+        basketFruit.className = 'transform hover:scale-110 transition-transform cursor-pointer';
+        basketFruit.title = `${fruitName} - ${displayDate}`;
+
+        if (isImageUrl(image)) {
+          basketFruit.innerHTML = `<img src="${image}" alt="${fruitName}" class="w-24 h-24 object-contain">`;
+        } else {
+          basketFruit.className += ' text-6xl';
+          basketFruit.textContent = image;
+        }
+
+        // 현재 나무 앞에 삽입
+        const currentTreeBasket = document.getElementById('current-tree-basket-emoji');
+        basketView.insertBefore(basketFruit, currentTreeBasket);
+      });
+
+      // 통계 업데이트
+      const inProgressCount = currentFruit ? 1 : 0;
+      const total = completedFruits.length + inProgressCount;
+      const completed = completedFruits.length;
+
+      const statsElement = document.querySelector('.mb-6.px-4 p');
+      if (statsElement) {
+        statsElement.innerHTML = `
+          전체 <span class="font-semibold text-gray-900">${total}</span> ·
+          완성 <span class="font-semibold text-green-600">${completed}</span> ·
+          진행중 <span class="font-semibold text-orange-600">${inProgressCount}</span>
+        `;
+      }
+    }
+
+    // 로그아웃 핸들러
+    document.getElementById('logout-btn').addEventListener('click', async function() {
+      if (confirm('로그아웃 하시겠습니까?')) {
+        try {
+          // 서버 로그아웃 API 호출 (쿠키 삭제)
+          const response = await fetch('/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+
+          // 성공 여부와 관계없이 로그인 페이지로 이동
+          window.location.href = '/login';
+        } catch (error) {
+          console.error('Logout error:', error);
+          // 에러가 발생해도 로그인 페이지로 이동
+          window.location.href = '/login';
+        }
+      }
+    });
+
+    // 페이지 로드 시 실행
+    document.addEventListener('DOMContentLoaded', async function() {
+      await fetchCurrentFruit();
+      await fetchCompletedFruits();
+      updateCurrentTree();
+      renderCompletedFruits();
+    });
+  </script>
 </body>
 </html>
