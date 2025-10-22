@@ -147,20 +147,43 @@ class RepoFruit(Repo):
 
     # #
     # unique
-    
+
+    @classmethod
+    async def count_my_completed(
+        cls,
+        session: AsyncSession,
+        user_id: str
+    ) -> int:
+        from sqlalchemy import func
+
+        async def find_count_my_completed(
+            session: AsyncSession,
+            model_class,
+            user_id: str
+        ):
+            query = select(func.count(model_class.id)).where(
+                model_class.user_id == user_id,
+                model_class.status == "COMPLETED"
+            )
+            result = await session.execute(query)
+            return result.scalar() or 0
+
+        found = await find_count_my_completed(session, FruitModel, user_id)
+        return found
+
     # #
     # joined
 
     # *joined query는 dict를 반환한다.
 
     @classmethod
-    async def get_is_in_progressed_by_user_id(
+    async def get_my_in_progress(
         cls,
         session: AsyncSession,
         user_id: str
     ) -> Optional[dict]:
         from grapechallenge.domain.fruit_template import FruitTemplateModel
-        async def find_in_progressed_fruit_by_user_id_with_template(
+        async def find_my_in_progress_with_template(
             session: AsyncSession,
             model_class,
             user_id: str
@@ -175,7 +198,7 @@ class RepoFruit(Repo):
             result = await session.execute(query)
             return result.first()
 
-        found = await find_in_progressed_fruit_by_user_id_with_template(session, FruitModel, user_id)
+        found = await find_my_in_progress_with_template(session, FruitModel, user_id)
 
         if not found:
             return None
@@ -209,7 +232,7 @@ class RepoFruit(Repo):
             user_id: str
         ):
             query = select(
-                model_class, 
+                model_class,
                 FruitTemplateModel
             ).join(
                 FruitTemplateModel,
@@ -219,7 +242,7 @@ class RepoFruit(Repo):
             )
             result = await session.execute(query)
             return result.all()
-        
+
         founds = await find_by_user_id_with_template(session, FruitModel, user_id)
 
         if not founds:
@@ -228,6 +251,61 @@ class RepoFruit(Repo):
         return [
             {
                 "fruit_id": found[0].id,
+                "status": found[0].status,
+                "name": found[1].name,
+                "type": found[1].type,
+                "first_status": found[1].first_status,
+                "second_status": found[1].second_status,
+                "third_status": found[1].third_status,
+                "fourth_status": found[1].fourth_status,
+                "fifth_status": found[1].fifth_status,
+                "sixth_status": found[1].sixth_status,
+                "seventh_status": found[1].seventh_status,
+                "created_at": found[0].created_at,
+                "updated_at": found[0].updated_at,
+            }
+            for found in founds
+        ]
+
+    @classmethod
+    async def get_by_cell_with_template(
+        cls,
+        session: AsyncSession,
+        cell: str
+    ) -> Optional[List[dict]]:
+        from grapechallenge.domain.fruit_template import FruitTemplateModel
+        from grapechallenge.domain.user.repo_user import UserModel
+        async def find_by_cell_with_template(
+            session: AsyncSession,
+            model_class,
+            cell: str
+        ):
+            query = select(
+                model_class,
+                FruitTemplateModel,
+                UserModel
+            ).join(
+                FruitTemplateModel,
+                model_class.template_id == FruitTemplateModel.id
+            ).join(
+                UserModel,
+                model_class.user_id == UserModel.id
+            ).where(
+                UserModel.cell == cell
+            )
+            result = await session.execute(query)
+            return result.all()
+
+        founds = await find_by_cell_with_template(session, FruitModel, cell)
+
+        if not founds:
+            return None
+
+        return [
+            {
+                "fruit_id": found[0].id,
+                "user_id": found[2].id,
+                "user_name": found[2].name,
                 "status": found[0].status,
                 "name": found[1].name,
                 "type": found[1].type,

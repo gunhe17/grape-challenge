@@ -10,16 +10,11 @@ from grapechallenge.domain.user import (
     Name,
 )
 from grapechallenge.usecase.common.models import UsecaseOutput
-
-
-class CreateUserInput(BaseModel):
-    cell: str
-    name: str
+from grapechallenge.usecase.create_user import CreateUserInput
 
 
 class CreateUsersInput(BaseModel):
     users: List[CreateUserInput]
-
 
 async def create_users(session: AsyncSession, request: Request, input: CreateUsersInput) -> UsecaseOutput:
 
@@ -71,8 +66,9 @@ def get_arguments():
     return args
 
 async def main():
-    import json
     from grapechallenge.database.database import transactional_session_helper
+    from unittest.mock import MagicMock
+    import json
 
     args = get_arguments()
 
@@ -82,6 +78,7 @@ async def main():
     async with transactional_session_helper() as session:
         result = await create_users(
             session=session,
+            request=MagicMock(),
             input=CreateUsersInput(users=data['users'])
         )
 

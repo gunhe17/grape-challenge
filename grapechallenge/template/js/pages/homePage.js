@@ -1,0 +1,315 @@
+/**
+ * Home Page Logic
+ * 홈 페이지의 비즈니스 로직과 이벤트 핸들러
+ */
+
+import { FruitAPI } from '../api/fruitApi.js';
+import { MissionCard } from '../../components/missionCard.js';
+import { getStageInfo, getStatusImage, isImageUrl, calculateProgress } from '../utils/helpers.js';
+import { FRUIT_STATUS, UI_CONSTANTS, MISSION_NAMES, EVENT_FRUIT_TEMPLATES, EVENT_FRUIT_CONDITIONS } from '../utils/constants.js';
+import { AuthAPI } from '../api/authApi.js';
+
+// ========================
+// 전역 상태
+// ========================
+let currentFruit = null;
+let currentMissions = [];
+
+// ========================
+// 초기화
+// ========================
+export async function initHomePage() {
+  await fetchAndUpdateFruit();
+  updateUI();
+  setupEventListeners();
+}
+
+function setupEventListeners() {
+  document.getElementById('logout-btn').addEventListener('click', handleLogout);
+}
+
+// ========================
+// 데이터 조회
+// ========================
+async function fetchAndUpdateFruit() {
+  const data = await FruitAPI.fetchCurrentFruit();
+
+  if (data) {
+    currentFruit = data.fruit;
+    currentMissions = data.missions;
+  } else {
+    currentFruit = null;
+    currentMissions = [];
+  }
+}
+
+// ========================
+// UI 업데이트
+// ========================
+async function updateUI() {
+  if (!currentFruit) {
+    updateProgressCircle(0);
+    updateStageDisplay(null, { level: 0, name: '씨앗을 심어주세요' });
+    await updateMissions(null);
+    return;
+  }
+
+  const stageInfo = getStageInfo(currentFruit.status);
+  const progress = calculateProgress(currentFruit.status);
+
+  updateProgressCircle(progress);
+  updateStageDisplay(currentFruit, stageInfo);
+  await updateMissions(currentFruit);
+}
+
+function updateProgressCircle(progress) {
+  const offset = UI_CONSTANTS.CIRCLE_CIRCUMFERENCE - (progress / 100) * UI_CONSTANTS.CIRCLE_CIRCUMFERENCE;
+  document.getElementById('progress-circle').style.strokeDashoffset = offset;
+}
+
+function updateStageDisplay(fruit, stageInfo) {
+  const emojiElement = document.getElementById('stage-emoji');
+  const stageText = `${stageInfo.level}단계`;
+
+  if (!fruit) {
+    emojiElement.textContent = '';
+    document.getElementById('stage-text').textContent = stageText;
+    return;
+  }
+
+  const image = getStatusImage(fruit);
+
+  if (isImageUrl(image)) {
+    emojiElement.innerHTML = `<img src="${image}" alt="fruit" class="w-full h-full object-contain">`;
+  } else {
+    emojiElement.textContent = image;
+  }
+
+  document.getElementById('stage-text').textContent = stageText;
+}
+
+async function updateMissions(fruit) {
+  const container = document.getElementById('mission-container');
+  container.innerHTML = '';
+
+  if (!fruit) {
+    const completedCount = await FruitAPI.fetchCompletedFruitsCount();
+    const card = MissionCard.createPlantSeedCard(handlePlantSeed, completedCount);
+    container.appendChild(card);
+    return;
+  }
+
+  let cardIndex = 0;
+
+  if (fruit.status === FRUIT_STATUS.SEVENTH) {
+    const card = MissionCard.createHarvestActionCard(handleHarvest);
+    card.style.animationDelay = `${cardIndex * UI_CONSTANTS.ANIMATION_DELAY_STEP}s`;
+    container.appendChild(card);
+    return;
+  }
+
+  // check if all missions are completed
+  const allCompleted = currentMissions.length > 0 && currentMissions.every(m => !m.can_complete);
+
+  if (allCompleted) {
+    const completionCard = MissionCard.createAllMissionsCompletedCard();
+    completionCard.style.animationDelay = `${cardIndex * UI_CONSTANTS.ANIMATION_DELAY_STEP}s`;
+    container.appendChild(completionCard);
+    cardIndex++;
+  }
+
+  if (currentMissions.length > 0) {
+    currentMissions.forEach(mission => {
+      const card = MissionCard.createDailyMissionCard(mission, handleCompleteMission);
+      card.style.animationDelay = `${cardIndex * UI_CONSTANTS.ANIMATION_DELAY_STEP}s`;
+      container.appendChild(card);
+      cardIndex++;
+    });
+  } else {
+    const card = MissionCard.createDailyMissionCard(null, handleCompleteMission);
+    card.style.animationDelay = `${cardIndex * UI_CONSTANTS.ANIMATION_DELAY_STEP}s`;
+    container.appendChild(card);
+    cardIndex++;
+  }
+}
+
+// ========================
+// 이벤트 핸들러
+// ========================
+async function handlePlantSeed(event) {
+  const btn = event.target;
+  btn.disabled = true;
+
+  // count completed fruits before creating new fruit
+  const completedCount = await FruitAPI.fetchCompletedFruitsCount();
+
+  let templateId = null;
+  let templateName = null;
+
+  // check conditions for event fruits
+  if (completedCount === EVENT_FRUIT_CONDITIONS.FIRST) {
+    templateName = EVENT_FRUIT_TEMPLATES.FIRST;
+  } else if (completedCount === EVENT_FRUIT_CONDITIONS.SECOND) {
+    templateName = EVENT_FRUIT_TEMPLATES.SECOND;
+  }
+
+  // fetch template if event fruit
+  if (templateName) {
+    templateId = await FruitAPI.fetchFruitTemplateByName(templateName);
+    if (!templateId) {
+      alert(`${templateName} 템플릿을 찾을 수 없습니다.`);
+      btn.textContent = '시작하기';
+      btn.disabled = false;
+      return;
+    }
+  }
+
+  const result = await FruitAPI.createNewFruit(templateId);
+
+  if (result) {
+    await fetchAndUpdateFruit();
+    updateUI();
+  } else {
+    alert('씨앗 심기 중 오류가 발생했습니다.');
+    btn.textContent = '시작하기';
+    btn.disabled = false;
+  }
+}
+
+async function handleCompleteMission(event) {
+  const btn = event.target;
+  if (!currentFruit) return;
+
+  const missionName = btn.getAttribute('data-mission-name');
+
+  // show modal for gratitude diary
+  if (missionName === MISSION_NAMES.GRATITUDE_DIARY) {
+    showGratitudeModal(btn);
+    return;
+  }
+
+  // complete mission without content
+  btn.disabled = true;
+
+  const result = await FruitAPI.completeMission(currentFruit.fruit_id, missionName, null);
+
+  if (result) {
+    await fetchAndUpdateFruit();
+    updateUI();
+  } else {
+    alert('미션 완료 중 오류가 발생했습니다.');
+    btn.textContent = '완료';
+    btn.disabled = false;
+  }
+}
+
+function showGratitudeModal(btn) {
+  const modal = document.getElementById('gratitude-modal');
+  const contentTextarea = document.getElementById('gratitude-content');
+  const submitBtn = document.getElementById('gratitude-submit-btn');
+  const cancelBtn = document.getElementById('gratitude-cancel-btn');
+
+  // reset textarea and disable submit button
+  contentTextarea.value = '';
+  submitBtn.disabled = true;
+  submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+  // show modal
+  modal.classList.remove('hidden');
+
+  // focus textarea
+  setTimeout(() => contentTextarea.focus(), 100);
+
+  // handle input change
+  const handleInput = () => {
+    const content = contentTextarea.value.trim();
+    if (content.length >= 5) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+  };
+
+  // handle cancel
+  const handleCancel = () => {
+    modal.classList.add('hidden');
+    cleanup();
+  };
+
+  // handle submit
+  const handleSubmit = async () => {
+    const content = contentTextarea.value.trim();
+
+    if (content.length < 5) {
+      alert('5자 이상 작성해주세요.');
+      return;
+    }
+
+    // hide modal
+    modal.classList.add('hidden');
+
+    // complete mission with content
+    btn.disabled = true;
+
+    const result = await FruitAPI.completeMission(currentFruit.fruit_id, MISSION_NAMES.GRATITUDE_DIARY, content);
+
+    if (result) {
+      await fetchAndUpdateFruit();
+      updateUI();
+    } else {
+      alert('미션 완료 중 오류가 발생했습니다.');
+      btn.textContent = '완료';
+      btn.disabled = false;
+    }
+
+    cleanup();
+  };
+
+  // cleanup listeners
+  const cleanup = () => {
+    contentTextarea.removeEventListener('input', handleInput);
+    submitBtn.removeEventListener('click', handleSubmit);
+    cancelBtn.removeEventListener('click', handleCancel);
+  };
+
+  // add listeners
+  contentTextarea.addEventListener('input', handleInput);
+  submitBtn.addEventListener('click', handleSubmit);
+  cancelBtn.addEventListener('click', handleCancel);
+}
+
+async function handleHarvest(event) {
+  const btn = event.target;
+  if (!currentFruit) return;
+
+  if (currentFruit.status !== FRUIT_STATUS.SEVENTH) {
+    alert('아직 수확할 수 없습니다.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '수확 중...';
+
+  const result = await FruitAPI.harvestFruit(currentFruit.fruit_id);
+
+  if (result) {
+    btn.textContent = '수확 완료! 🎉';
+    setTimeout(async () => {
+      await fetchAndUpdateFruit();
+      updateUI();
+    }, 1500);
+  } else {
+    alert('수확 중 오류가 발생했습니다.');
+    btn.textContent = '수확하기';
+    btn.disabled = false;
+  }
+}
+
+async function handleLogout() {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+
+  await AuthAPI.logout();
+  AuthAPI.redirectToLogin();
+}

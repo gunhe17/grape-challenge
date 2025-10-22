@@ -11,7 +11,6 @@ class LoginUserInput(BaseModel):
     cell: str
     name: str
 
-
 async def login_user(session: AsyncSession, request: Request, input: LoginUserInput) -> UsecaseOutput:
 
     # 입력 값 검증
@@ -43,6 +42,7 @@ async def login_user(session: AsyncSession, request: Request, input: LoginUserIn
     return UsecaseOutput(
         content={
             "user_id": user.id,
+            "user_cell": user.user.cell.to_str(),
             "message": "로그인 성공"
         },
         code=200

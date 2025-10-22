@@ -17,6 +17,7 @@ class MissionModel(Base):
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     template_id = Column(String(36), ForeignKey("mission_templates.id", ondelete="CASCADE"), nullable=False)
     fruit_id = Column(String(36), ForeignKey("fruits.id", ondelete="CASCADE"), nullable=False)
+    content = Column(String(1000), nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=None, nullable=True)
 
@@ -84,6 +85,7 @@ class RepoMission(Repo):
                 "user_id": created.user_id,
                 "template_id": created.template_id,
                 "fruit_id": created.fruit_id,
+                "content": created.content,
             }),
             created_at=created.created_at,
             updated_at=created.updated_at,
@@ -110,6 +112,7 @@ class RepoMission(Repo):
                 "user_id": updated.user_id,
                 "template_id": updated.template_id,
                 "fruit_id": updated.fruit_id,
+                "content": updated.content,
             }),
             created_at=updated.created_at,
             updated_at=updated.updated_at,
@@ -140,6 +143,7 @@ class RepoMission(Repo):
                 "user_id": found.user_id,
                 "template_id": found.template_id,
                 "fruit_id": found.fruit_id,
+                "content": found.content,
             }),
             created_at=found.created_at,
             updated_at=found.updated_at,
@@ -168,6 +172,7 @@ class RepoMission(Repo):
                     "user_id": item.user_id,
                     "template_id": item.template_id,
                     "fruit_id": item.fruit_id,
+                    "content": item.content,
                 }),
                 created_at=item.created_at,
                 updated_at=item.updated_at,
@@ -198,6 +203,7 @@ class RepoMission(Repo):
                     "user_id": item.user_id,
                     "template_id": item.template_id,
                     "fruit_id": item.fruit_id,
+                    "content": item.content,
                 }),
                 created_at=item.created_at,
                 updated_at=item.updated_at,
@@ -206,28 +212,32 @@ class RepoMission(Repo):
         ]
 
     @classmethod
-    async def has_today_mission_with_template(
+    async def is_template_completed_today(
         cls,
         session: AsyncSession,
         user_id: str,
         template_id: str
     ) -> bool:
-        """
-        Check if user has created a mission with the given template_id today
-        """
-        today_start = datetime.combine(date.today(), datetime.min.time())
-        today_end = datetime.combine(date.today(), datetime.max.time())
+        
+        async def find_count_completed_today(
+            session: AsyncSession,
+            model_class,
+            user_id: str,
+            template_id: str
+        ):
+            today_start = datetime.combine(date.today(), datetime.min.time())
+            today_end = datetime.combine(date.today(), datetime.max.time())
 
-        query = select(func.count(MissionModel.id)).where(
-            and_(
-                MissionModel.user_id == user_id,
-                MissionModel.template_id == template_id,
-                MissionModel.created_at >= today_start,
-                MissionModel.created_at <= today_end
+            query = select(func.count(model_class.id)).where(
+                and_(
+                    model_class.user_id == user_id,
+                    model_class.template_id == template_id,
+                    model_class.created_at >= today_start,
+                    model_class.created_at <= today_end
+                )
             )
-        )
+            result = await session.execute(query)
+            return result.scalar() or 0
 
-        result = await session.execute(query)
-        count = result.scalar()
-
+        count = await find_count_completed_today(session, MissionModel, user_id, template_id)
         return count > 0

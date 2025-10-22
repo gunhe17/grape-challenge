@@ -9,6 +9,7 @@ class Mission:
     user_id: str
     template_id: str
     fruit_id: str
+    content: str
 
     # #
     # factory
@@ -20,12 +21,14 @@ class Mission:
         user_id: str,
         template_id: str,
         fruit_id: str,
+        content: str,
     ) -> "Mission":
         try:
             return cls(
                 user_id=user_id,
                 template_id=template_id,
                 fruit_id=fruit_id,
+                content=content,
             )
         except ValidationError as e:
             raise InvalidTypeError.from_pydantic(e)
@@ -36,6 +39,7 @@ class Mission:
             user_id=data.get("user_id", None),          #type: ignore
             template_id=data.get("template_id", None),  #type: ignore
             fruit_id=data.get("fruit_id", None),        #type: ignore
+            content=data.get("content", None),          #type: ignore
         )
 
     # #
@@ -46,4 +50,5 @@ class Mission:
             "user_id": self.user_id,
             "template_id": self.template_id,
             "fruit_id": self.fruit_id,
+            "content": self.content,
         }

@@ -6,19 +6,15 @@ from grapechallenge.domain.fruit import RepoFruit
 from grapechallenge.usecase.common.models import UsecaseOutput
 
 
-class GetIsMineFruitsInput(BaseModel):
-    pass
+class GetFruitsByCellWithTemplateInput(BaseModel):
+    cell: str
 
-
-async def get_is_mine_fruits(session: AsyncSession, request: Request, input: GetIsMineFruitsInput) -> UsecaseOutput:
-    user_id = request.cookies.get("user_id", None)
-    if not user_id:
-        return UsecaseOutput(content={"message": "not authenticated"}, code=401)
-
-    # get fruits
-    founds = await RepoFruit.get_by_user_id_with_template(
+async def get_fruits_by_cell_with_template(session: AsyncSession, request: Request, input: GetFruitsByCellWithTemplateInput) -> UsecaseOutput:
+    
+    # get fruits by cell
+    founds = await RepoFruit.get_by_cell_with_template(
         session=session,
-        user_id=user_id
+        cell=input.cell
     )
 
     if not founds:
@@ -34,7 +30,7 @@ async def get_is_mine_fruits(session: AsyncSession, request: Request, input: Get
         content={
             "fruits": [
                 {
-                    "fruit_id": found.get("get", None),
+                    "fruit_id": found.get("fruit_id", None),
                     "status": found.get("status", None),
                     "name": found.get("name", None),
                     "type": found.get("type", None),
@@ -45,8 +41,8 @@ async def get_is_mine_fruits(session: AsyncSession, request: Request, input: Get
                     "fifth_status": found.get("fifth_status", None),
                     "sixth_status": found.get("sixth_status", None),
                     "seventh_status": found.get("seventh_status", None),
-                    "created_at": found.get("created_at").isoformat() if found.get("created_at") else None,
-                    "updated_at": found.get("updated_at").isoformat() if found.get("updated_at") else None,
+                    "created_at": found.get("created_at").isoformat() if found.get("created_at") else None, # type:ignore
+                    "updated_at": found.get("updated_at").isoformat() if found.get("updated_at") else None, # type:ignore
                 }
                 for found in founds
             ],

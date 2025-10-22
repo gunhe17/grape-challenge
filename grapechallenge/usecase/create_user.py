@@ -15,7 +15,6 @@ class CreateUserInput(BaseModel):
     cell: str
     name: str
 
-
 async def create_user(session: AsyncSession, request: Request, input: CreateUserInput) -> UsecaseOutput:
     
     # create user

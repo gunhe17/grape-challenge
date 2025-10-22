@@ -170,6 +170,58 @@ class RepoUser(Repo):
             updated_at=found.updated_at,
         )
 
+    @classmethod
+    async def get_by_cell(
+        cls,
+        session: AsyncSession,
+        cell: str
+    ) -> Optional[List["RepoUser"]]:
+
+        founds = await cls.find_filtered_by_fields(
+            session=session,
+            model_class=UserModel,
+            cell=cell
+        )
+
+        if not founds:
+            return None
+
+        return [
+            cls(
+                id=found.id,
+                user=User.from_dict({
+                    "cell": found.cell,
+                    "name": found.name
+                }),
+                created_at=found.created_at,
+                updated_at=found.updated_at,
+            )
+            for found in founds
+        ]
+
+    @classmethod
+    async def get_all_cells(
+        cls,
+        session: AsyncSession
+    ) -> Optional[List[str]]:
+        from sqlalchemy import distinct
+        from sqlalchemy.future import select
+
+        async def find_all_distinct_cells(
+            session: AsyncSession,
+            model_class
+        ):
+            query = select(distinct(model_class.cell)).order_by(model_class.cell)
+            result = await session.execute(query)
+            return result.scalars().all()
+
+        cells = await find_all_distinct_cells(session, UserModel)
+
+        if not cells:
+            return None
+
+        return list(cells)
+
     # TODO: LOG-IN field
     @classmethod
     async def get_by_cell_and_name(

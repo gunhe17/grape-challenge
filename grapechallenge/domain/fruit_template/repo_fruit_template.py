@@ -205,6 +205,42 @@ class RepoFruitTemplate(Repo):
         ]
 
     @classmethod
+    async def get_by_type(
+        cls,
+        session: AsyncSession,
+        type: str
+    ) -> Optional[List["RepoFruitTemplate"]]:
+
+        founds = await cls.find_filtered_by_fields(
+            session=session,
+            model_class=FruitTemplateModel,
+            type=type
+        )
+
+        if not founds:
+            return None
+
+        return [
+            cls(
+                id=item.id,
+                fruit_template=FruitTemplate.from_dict({
+                    "name": item.name,
+                    "type": item.type,
+                    "first_status": item.first_status,
+                    "second_status": item.second_status,
+                    "third_status": item.third_status,
+                    "fourth_status": item.fourth_status,
+                    "fifth_status": item.fifth_status,
+                    "sixth_status": item.sixth_status,
+                    "seventh_status": item.seventh_status,
+                }),
+                created_at=item.created_at,
+                updated_at=item.updated_at,
+            )
+            for item in founds
+        ]
+
+    @classmethod
     async def get_all(
         cls,
         session: AsyncSession

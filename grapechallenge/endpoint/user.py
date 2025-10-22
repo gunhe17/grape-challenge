@@ -1,5 +1,5 @@
 from urllib.parse import quote
-from fastapi import Request
+from fastapi import Request, Depends
 from fastapi.responses import JSONResponse
 
 from grapechallenge.database.database import transactional_session_helper
@@ -9,6 +9,8 @@ from grapechallenge.usecase import (
     CreateUsersInput, create_users,
     LoginUserInput, login_user,
     LogoutUserInput, logout_user,
+    # query
+    GetEveryCellInput, get_every_cell,
 )
 
 
@@ -37,9 +39,9 @@ async def post_login(request: Request, input: LoginUserInput) -> JSONResponse:
 
     # 로그인 성공 시 쿠키 설정
     if res.code == 200 and res.content.get("user_id"):
-        response.set_cookie(key="user_id", value=str(res.content["user_id"]), httponly=True, max_age=30*24*60*60)  # 30일
-        response.set_cookie(key="user_cell", value=quote(input.cell), httponly=True, max_age=30*24*60*60)
-        response.set_cookie(key="user_name", value=quote(input.name), httponly=True, max_age=30*24*60*60)
+        response.set_cookie(key="user_id", value=str(res.content["user_id"]), httponly=True, path="/", max_age=30*24*60*60)  # 30일
+        response.set_cookie(key="user_cell", value=quote(input.cell), httponly=False, path="/", max_age=30*24*60*60)
+        response.set_cookie(key="user_name", value=quote(input.name), httponly=False, path="/", max_age=30*24*60*60)
 
     return response
 
@@ -56,3 +58,13 @@ async def post_logout(request: Request, input: LogoutUserInput) -> JSONResponse:
     response.delete_cookie(key="user_name", path="/")
 
     return response
+
+
+# #
+# Query
+
+async def get_cells(request: Request, input: GetEveryCellInput = Depends()) -> JSONResponse:
+    async with transactional_session_helper() as session:
+        res = await get_every_cell(session=session, request=request, input=input)
+
+    return JSONResponse(content=res.content, status_code=res.code)

@@ -71,7 +71,7 @@ class Fruit:
             case "SIXTH_STATUS":
                 next_status = "SEVENTH_STATUS"
             case "SEVENTH_STATUS":
-                next_status = "COMPLETED"
+                next_status = "SEVENTH_STATUS"
             case _:
                 next_status = current
 

@@ -1,4 +1,4 @@
-import random
+from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request
@@ -11,7 +11,7 @@ from grapechallenge.usecase.common.models import UsecaseOutput
 class CompleteMissionInput(BaseModel):
     fruit_id: str
     name: str
-
+    content: Optional[str] = None
 
 async def complete_mission(session: AsyncSession, request: Request, input: CompleteMissionInput) -> UsecaseOutput:
     user_id = request.cookies.get("user_id", None)
@@ -37,6 +37,7 @@ async def complete_mission(session: AsyncSession, request: Request, input: Compl
             template_id=(
                 found_templates.id
             ),
+            content=input.content or "",
         )
     )
 
