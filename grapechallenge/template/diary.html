@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>말씀 챌린지 - 감사일기장</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+  <link rel="stylesheet" href="./css/animations.css">
+</head>
+<body class="overflow-hidden h-screen">
+  <div class="bg-white h-full flex flex-col">
+    <header class="flex-none bg-white sticky top-0 z-[10001]">
+      <nav aria-label="Global" class="flex items-center justify-between px-5 py-4 lg:px-7">
+        <div class="flex items-center ml-2">
+          <a href="/home" class="-m-1 p-1 inline-flex items-center justify-center">
+            <span class="sr-only">홈</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6 text-gray-700">
+              <path d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+        <div class="flex mr-2">
+          <button type="button" command="show-modal" commandfor="mobile-menu" class="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-700">
+            <span class="sr-only">메뉴 열기</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="w-6 h-6">
+              <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </nav>
+      <div id="sidebar-container"></div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="relative flex-1 overflow-y-auto">
+      <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+        <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
+      </div>
+
+      <div class="mx-auto max-w-7xl px-5 lg:px-7 py-7 sm:py-10">
+        <div class="text-center mb-10">
+          <h1 class="text-3xl font-bold tracking-tight text-gray-900">감사일기장</h1>
+          <p class="mt-2 text-sm text-gray-600">오늘 우리가 고백한 감사의 제목들</p>
+        </div>
+
+        <!-- Content Area -->
+        <div class="max-w-4xl mx-auto">
+          <!-- Stats -->
+          <div class="mb-5 px-2">
+            <p id="diary-stats-text" class="text-sm text-gray-600">
+              전체 <span class="font-semibold text-gray-900">0</span>개
+            </p>
+          </div>
+
+          <!-- Diary List -->
+          <div id="diary-list" class="space-y-4">
+            <!-- Loading skeleton -->
+            <div class="diary-skeleton">
+              <div class="rounded-xl bg-gray-100 px-6 py-5 animate-pulse">
+                <div class="space-y-3">
+                  <div class="h-4 bg-gray-200 rounded w-full"></div>
+                  <div class="h-4 bg-gray-200 rounded w-4/5"></div>
+                  <div class="flex items-center justify-end">
+                    <div class="h-3 bg-gray-200 rounded w-24"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty state (hidden by default) -->
+            <div id="diary-empty" class="hidden text-center py-20">
+              <p class="text-gray-500">아직 작성한 감사일기가 없습니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div aria-hidden="true" class="absolute inset-x-0 bottom-0 -z-10 transform-gpu overflow-hidden blur-3xl pointer-events-none">
+        <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%+36rem)] sm:w-288.75"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initDiaryPage } from './js/pages/diaryPage.js';
+    import { Sidebar } from '/components/sidebar.js';
+
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', async function() {
+      // 사이드바 렌더링
+      const sidebarContainer = document.getElementById('sidebar-container');
+      if (sidebarContainer) {
+        sidebarContainer.innerHTML = Sidebar.createHTML();
+        Sidebar.init();
+      }
+
+      await initDiaryPage();
+    });
+  </script>
+</body>
+</html>

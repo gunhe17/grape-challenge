@@ -87,5 +87,14 @@ async def grove_page(request: Request) -> HTMLResponse:
     })
 
 
+@require_auth()
+async def diary_page(request: Request) -> HTMLResponse:
+    user = get_current_user(request)
+    return templates.TemplateResponse("diary.html", {
+        "request": request,
+        "user": user
+    })
+
+
 async def login_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("login.html", {"request": request})

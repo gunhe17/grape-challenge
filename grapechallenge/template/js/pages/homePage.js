@@ -25,7 +25,7 @@ export async function initHomePage() {
 }
 
 function setupEventListeners() {
-  document.getElementById('logout-btn').addEventListener('click', handleLogout);
+  // Logout button is now handled by Sidebar component
 }
 
 // ========================
@@ -222,11 +222,13 @@ async function handleCompleteMission(event) {
 function showGratitudeModal(btn) {
   const modal = document.getElementById('gratitude-modal');
   const contentTextarea = document.getElementById('gratitude-content');
+  const charCountEl = document.getElementById('gratitude-char-count');
   const submitBtn = document.getElementById('gratitude-submit-btn');
   const cancelBtn = document.getElementById('gratitude-cancel-btn');
 
   // reset textarea and disable submit button
   contentTextarea.value = '';
+  charCountEl.textContent = '0';
   submitBtn.disabled = true;
   submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
@@ -239,7 +241,13 @@ function showGratitudeModal(btn) {
   // handle input change
   const handleInput = () => {
     const content = contentTextarea.value.trim();
-    if (content.length >= 5) {
+    const charCount = contentTextarea.value.length;
+
+    // Update character count
+    charCountEl.textContent = charCount;
+
+    // Update submit button state
+    if (content.length >= 5 && content.length <= 40) {
       submitBtn.disabled = false;
       submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {

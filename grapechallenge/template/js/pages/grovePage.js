@@ -74,7 +74,6 @@ const elements = {
  * Initialize DOM elements cache
  */
 function cacheElements() {
-  elements.logoutBtn = document.getElementById('logout-btn');
   elements.groveModeButton = document.getElementById('grove-mode-button');
   elements.gridBtn = document.getElementById('grid-btn');
   elements.basketBtn = document.getElementById('basket-btn');
@@ -98,7 +97,7 @@ function cacheElements() {
  * Setup event listeners
  */
 function setupEventListeners() {
-  elements.logoutBtn.addEventListener('click', handleLogout);
+  // Logout button is now handled by Sidebar component
   elements.groveModeButton.addEventListener('click', handleDropdownToggle);
 
   // dropdown options
@@ -649,16 +648,6 @@ function showLoadingState() {
     </div>
   `;
   elements.gridView.insertBefore(skeleton, elements.currentTreeCard);
-}
-
-/**
- * Handle logout
- */
-async function handleLogout() {
-  if (!confirm('로그아웃 하시겠습니까?')) return;
-
-  await AuthAPI.logout();
-  AuthAPI.redirectToLogin();
 }
 
 // ========================

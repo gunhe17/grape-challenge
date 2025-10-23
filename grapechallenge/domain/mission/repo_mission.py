@@ -227,3 +227,77 @@ class RepoMission(Repo):
         )
         result = await session.execute(query)
         return (result.scalar() or 0) > 0
+    
+    # #
+    # joined
+
+    # *joined query는 dict를 반환한다.
+
+    @classmethod
+    async def get_by_template_name(
+        cls,
+        session: AsyncSession,
+        name: str,
+        date: Optional[str] = None
+    ) -> Optional[List[dict]]:
+        from grapechallenge.domain.mission_template.repo_mission_template import MissionTemplateModel
+        from grapechallenge.domain.user.repo_user import UserModel
+
+        async def find_by_template_name(
+            session: AsyncSession,
+            model_class,
+            name: str,
+            date: Optional[str] = None
+        ):
+            conditions = [MissionTemplateModel.name == name]
+
+            # Add date filter if date is "today"
+            if date == "today":
+                conditions.append(
+                    func.date(model_class.created_at) == func.current_date()
+                )
+
+            query = select(
+                model_class,
+                MissionTemplateModel,
+                UserModel
+            ).join(
+                MissionTemplateModel,
+                model_class.template_id == MissionTemplateModel.id
+            ).join(
+                UserModel,
+                model_class.user_id == UserModel.id
+            ).where(
+                and_(*conditions)
+            )
+            result = await session.execute(query)
+            return result.all()
+
+        founds = await find_by_template_name(session, MissionModel, name, date)
+
+        if not founds:
+            return None
+
+        return [
+            {
+                "mission_id": found[0].id,
+                "mission_user_id": found[0].user_id,
+                "mission_template_id": found[0].template_id,
+                "mission_fruit_id": found[0].fruit_id,
+                "mission_content": found[0].content,
+                "mission_created_at": found[0].created_at,
+                "mission_updated_at": found[0].updated_at,
+                "template_id": found[1].id,
+                "template_name": found[1].name,
+                "template_content": found[1].content,
+                "template_type": found[1].type,
+                "template_created_at": found[1].created_at,
+                "template_updated_at": found[1].updated_at,
+                "user_id": found[2].id,
+                "user_cell": found[2].cell,
+                "user_name": found[2].name,
+                "user_created_at": found[2].created_at,
+                "user_updated_at": found[2].updated_at,
+            }
+            for found in founds
+        ]

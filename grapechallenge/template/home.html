@@ -29,34 +29,7 @@
           </button>
         </div>
       </nav>
-      <el-dialog>
-        <dialog id="mobile-menu" class="backdrop:bg-transparent">
-          <div tabindex="0" class="fixed inset-0 focus:outline-none">
-            <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 animate-slide-in">
-              <div class="flex items-center justify-between">
-                <a href="/home" class="-m-1.5 p-1.5 cursor-pointer">
-                  <span class="text-xl font-bold text-black">말씀 챌린지</span>
-                </a>
-                <button type="button" command="close" commandfor="mobile-menu" class="-m-2.5 rounded-md p-2.5 text-gray-700 hover:bg-gray-100 transition-colors">
-                  <span class="sr-only">메뉴 닫기</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
-                    <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </button>
-              </div>
-              <div class="mt-6 flow-root">
-                <div class="-my-6 divide-y divide-gray-500/10">
-                  <div class="space-y-2 py-6">
-                    <a href="/grove" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200">과수원</a>
-                    <a href="https://www.notion.so/gun17/29470a02a0b780d1b3f6ffb3a80e4189?source=copy_link" target="_blank" rel="noopener noreferrer" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200">문의하기</a>
-                    <button id="logout-btn" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 w-full text-left">로그아웃</button>
-                  </div>
-                </div>
-              </div>
-            </el-dialog-panel>
-          </div>
-        </dialog>
-      </el-dialog>
+      <div id="sidebar-container"></div>
     </header>
 
     <div class="relative isolate flex-1 overflow-y-auto">
@@ -149,15 +122,21 @@
       <div class="relative transform overflow-hidden rounded-2xl bg-white px-6 py-6 shadow-xl transition-all w-full max-w-2xl sm:my-8">
         <div class="mb-4">
           <h3 class="text-lg font-semibold text-gray-900">감사 일기 쓰기</h3>
-          <p class="mt-1 text-sm text-gray-600">오늘 하루 감사했던 일을 작성해주세요</p>
+          <p class="mt-1 text-sm text-gray-600">오늘 하루 감사했던 일을 작성해주세요 (40자 이내)</p>
         </div>
 
-        <textarea
-          id="gratitude-content"
-          rows="6"
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
-          placeholder="..."
-        ></textarea>
+        <div class="relative">
+          <textarea
+            id="gratitude-content"
+            rows="6"
+            maxlength="40"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+            placeholder="..."
+          ></textarea>
+          <div class="absolute bottom-2 right-3 text-xs text-gray-400">
+            <span id="gratitude-char-count">0</span>/40
+          </div>
+        </div>
 
         <div class="mt-6 flex gap-3 justify-end">
           <button
@@ -181,12 +160,20 @@
 
   <script type="module">
     import { initHomePage } from '/static/js/pages/homePage.js';
+    import { Sidebar } from '/components/sidebar.js';
 
     // APP_ENV를 전역으로 설정
     window.APP_ENV = "{{ app_env }}";
 
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', async function() {
+      // 사이드바 렌더링
+      const sidebarContainer = document.getElementById('sidebar-container');
+      if (sidebarContainer) {
+        sidebarContainer.innerHTML = Sidebar.createHTML();
+        Sidebar.init();
+      }
+
       await initHomePage();
     });
   </script>

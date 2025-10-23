@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request
 
-from grapechallenge.domain.mission import RepoMission, Mission
+from grapechallenge.domain.mission import RepoMission, Mission, Content
 from grapechallenge.domain.mission_template import RepoMissionTemplate
 from grapechallenge.usecase.common.models import UsecaseOutput
 
@@ -37,7 +37,7 @@ async def complete_mission(session: AsyncSession, request: Request, input: Compl
             template_id=(
                 found_templates.id
             ),
-            content=input.content or "",
+            content=Content.from_str(input.content or ""),
         )
     )
 

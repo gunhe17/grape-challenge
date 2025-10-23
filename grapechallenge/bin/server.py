@@ -83,6 +83,10 @@ Router(
 
 # Mission
 Router(
+    "/mission", ["GET"], mission.get_missions
+).register(app)
+
+Router(
     "/mission/complete", ["POST"], mission.post_mission
 ).register(app)
 
@@ -101,6 +105,10 @@ Router(
 
 Router(
     "/grove", ["GET"], template.grove_page
+).register(app)
+
+Router(
+    "/diary", ["GET"], template.diary_page
 ).register(app)
 
 Router(
