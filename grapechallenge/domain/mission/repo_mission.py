@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime
 from typing import Optional, List
 from sqlalchemy import Column, String, DateTime, ForeignKey, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -218,26 +218,12 @@ class RepoMission(Repo):
         user_id: str,
         template_id: str
     ) -> bool:
-        
-        async def find_count_completed_today(
-            session: AsyncSession,
-            model_class,
-            user_id: str,
-            template_id: str
-        ):
-            today_start = datetime.combine(date.today(), datetime.min.time())
-            today_end = datetime.combine(date.today(), datetime.max.time())
-
-            query = select(func.count(model_class.id)).where(
-                and_(
-                    model_class.user_id == user_id,
-                    model_class.template_id == template_id,
-                    model_class.created_at >= today_start,
-                    model_class.created_at <= today_end
-                )
+        query = select(func.count(MissionModel.id)).where(
+            and_(
+                MissionModel.user_id == user_id,
+                MissionModel.template_id == template_id,
+                func.date(MissionModel.created_at) == func.current_date()
             )
-            result = await session.execute(query)
-            return result.scalar() or 0
-
-        count = await find_count_completed_today(session, MissionModel, user_id, template_id)
-        return count > 0
+        )
+        result = await session.execute(query)
+        return (result.scalar() or 0) > 0
