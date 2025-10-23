@@ -31,6 +31,7 @@ async def get_fruits_by_cell_with_template(session: AsyncSession, request: Reque
             "fruits": [
                 {
                     "fruit_id": found.get("fruit_id", None),
+                    "user_name": found.get("user_name", None),
                     "status": found.get("status", None),
                     "name": found.get("name", None),
                     "type": found.get("type", None),

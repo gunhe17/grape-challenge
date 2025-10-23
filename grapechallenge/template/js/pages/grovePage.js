@@ -327,15 +327,13 @@ function renderCellOptions() {
 function updateCurrentTree() {
   const shouldShow = state.groveMode === GROVE_MODES.MY && state.currentFruit;
 
-  // Remove skeleton on first render
-  const skeleton = elements.gridView.querySelector('.grid-skeleton');
-  if (skeleton) {
-    skeleton.remove();
-  }
-
   if (!shouldShow) {
-    elements.currentTreeCard.style.display = 'none';
-    elements.currentTreeBasketEmoji.style.display = 'none';
+    if (elements.currentTreeCard) {
+      elements.currentTreeCard.style.display = 'none';
+    }
+    if (elements.currentTreeBasketEmoji) {
+      elements.currentTreeBasketEmoji.style.display = 'none';
+    }
     return;
   }
 
@@ -352,6 +350,7 @@ function updateCurrentTree() {
   // show with animation
   elements.currentTreeCard.classList.remove('hidden');
   elements.currentTreeCard.classList.add('grid-item-animate');
+  elements.currentTreeCard.style.display = 'block';
 
   // update basket view
   updateImageElement(
@@ -370,7 +369,7 @@ function updateCurrentTree() {
 function renderCompletedFruits() {
   const basketViewContainer = elements.basketView.querySelector('.relative.z-10');
 
-  // remove skeleton on first render
+  // remove skeleton
   const skeleton = elements.gridView.querySelector('.grid-skeleton');
   if (skeleton) {
     skeleton.remove();
@@ -383,12 +382,22 @@ function renderCompletedFruits() {
       card.remove();
     }
   });
-  basketViewContainer.querySelectorAll('div:not(#current-tree-basket-emoji)').forEach(fruit => fruit.remove());
+
+  // remove basket fruits
+  if (basketViewContainer) {
+    basketViewContainer.querySelectorAll('div:not(#current-tree-basket-emoji)').forEach(fruit => fruit.remove());
+  }
 
   // render completed fruits (newest first) with staggered animation
   [...state.completedFruits].reverse().forEach((fruit, index) => {
     const image = fruit.seventh_status || '🍎';
-    const fruitName = fruit.name || '과일';
+    const baseFruitName = fruit.name || '과일';
+
+    // Add user name if not in "my" mode
+    const fruitName = state.groveMode !== GROVE_MODES.MY && fruit.user_name
+      ? `${fruit.user_name}의 ${baseFruitName}`
+      : baseFruitName;
+
     const displayDate = fruit.updated_at ? formatDate(fruit.updated_at) : '';
 
     // insert into grid view with animation
@@ -398,8 +407,10 @@ function renderCompletedFruits() {
     elements.gridView.insertBefore(card, elements.currentTreeCard);
 
     // insert into basket view
-    const basketFruit = createBasketFruit(image, fruitName, displayDate);
-    basketViewContainer.insertBefore(basketFruit, elements.currentTreeBasketEmoji);
+    if (basketViewContainer) {
+      const basketFruit = createBasketFruit(image, fruitName, displayDate);
+      basketViewContainer.insertBefore(basketFruit, elements.currentTreeBasketEmoji);
+    }
   });
 
   updateStatistics();
@@ -587,9 +598,7 @@ async function handleGroveModeChange(mode, cellName = null) {
  * Show loading state
  */
 function showLoadingState() {
-  // Clear current data
-  state.currentFruit = null;
-  state.completedFruits = [];
+  // DON'T clear state data here - it will be updated by fetch functions
 
   // Reset stats to 0
   if (elements.statsText) {
@@ -604,7 +613,13 @@ function showLoadingState() {
     elements.currentTreeBasketEmoji.style.display = 'none';
   }
 
-  // Remove all existing fruit cards
+  // Remove existing skeleton first
+  const existingSkeleton = elements.gridView.querySelector('.grid-skeleton');
+  if (existingSkeleton) {
+    existingSkeleton.remove();
+  }
+
+  // Remove all existing fruit cards (except current tree card)
   const allCards = elements.gridView.querySelectorAll('.relative.rounded-xl');
   allCards.forEach(card => {
     if (card.id !== 'current-tree-card') {
