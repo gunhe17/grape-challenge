@@ -90,6 +90,14 @@ function updateStageDisplay(fruit, stageInfo) {
 
 async function updateMissions(fruit) {
   const container = document.getElementById('mission-container');
+
+  // Remove skeleton if it exists
+  const skeleton = container.querySelector('.mission-skeleton');
+  if (skeleton) {
+    skeleton.remove();
+  }
+
+  // Clear container
   container.innerHTML = '';
 
   if (!fruit) {

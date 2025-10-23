@@ -85,7 +85,7 @@ function cacheElements() {
   elements.basketView = document.getElementById('basket-view');
 
   elements.groveModeText = document.getElementById('grove-mode-text');
-  elements.statsText = document.querySelector('.mb-5.px-2 p');
+  elements.statsText = document.getElementById('stats-text');
 
   elements.currentTreeCard = document.getElementById('current-tree-card');
   elements.currentTreeEmoji = document.getElementById('current-tree-emoji');
@@ -327,10 +327,17 @@ function renderCellOptions() {
 function updateCurrentTree() {
   const shouldShow = state.groveMode === GROVE_MODES.MY && state.currentFruit;
 
-  elements.currentTreeCard.style.display = shouldShow ? 'block' : 'none';
-  elements.currentTreeBasketEmoji.style.display = shouldShow ? 'block' : 'none';
+  // Remove skeleton on first render
+  const skeleton = elements.gridView.querySelector('.grid-skeleton');
+  if (skeleton) {
+    skeleton.remove();
+  }
 
-  if (!shouldShow) return;
+  if (!shouldShow) {
+    elements.currentTreeCard.style.display = 'none';
+    elements.currentTreeBasketEmoji.style.display = 'none';
+    return;
+  }
 
   const stageInfo = getStageInfo(state.currentFruit.status);
   const image = getStatusImage(state.currentFruit);
@@ -342,6 +349,10 @@ function updateCurrentTree() {
   elements.currentTreeDate.textContent = displayDate;
   updateImageElement(elements.currentTreeEmoji, image, IMAGE_SIZES.GRID);
 
+  // show with animation
+  elements.currentTreeCard.classList.remove('hidden');
+  elements.currentTreeCard.classList.add('grid-item-animate');
+
   // update basket view
   updateImageElement(
     elements.currentTreeBasketEmoji,
@@ -350,6 +361,7 @@ function updateCurrentTree() {
     'transform hover:scale-110 transition-transform cursor-pointer'
   );
   elements.currentTreeBasketEmoji.setAttribute('title', `${fruitName} - ${stageInfo.level}단계 ${stageInfo.name}`);
+  elements.currentTreeBasketEmoji.style.display = 'block';
 }
 
 /**
@@ -357,6 +369,12 @@ function updateCurrentTree() {
  */
 function renderCompletedFruits() {
   const basketViewContainer = elements.basketView.querySelector('.relative.z-10');
+
+  // remove skeleton on first render
+  const skeleton = elements.gridView.querySelector('.grid-skeleton');
+  if (skeleton) {
+    skeleton.remove();
+  }
 
   // remove existing completed fruit cards (but keep current tree card)
   const allCards = elements.gridView.querySelectorAll('.relative.rounded-xl');
@@ -367,14 +385,16 @@ function renderCompletedFruits() {
   });
   basketViewContainer.querySelectorAll('div:not(#current-tree-basket-emoji)').forEach(fruit => fruit.remove());
 
-  // render completed fruits (newest first)
-  [...state.completedFruits].reverse().forEach((fruit) => {
+  // render completed fruits (newest first) with staggered animation
+  [...state.completedFruits].reverse().forEach((fruit, index) => {
     const image = fruit.seventh_status || '🍎';
     const fruitName = fruit.name || '과일';
     const displayDate = fruit.updated_at ? formatDate(fruit.updated_at) : '';
 
-    // insert into grid view
+    // insert into grid view with animation
     const card = createFruitCard(image, fruitName, displayDate);
+    card.classList.add('grid-item-animate');
+    card.style.animationDelay = `${index * 0.05}s`;
     elements.gridView.insertBefore(card, elements.currentTreeCard);
 
     // insert into basket view
@@ -499,7 +519,6 @@ function handleDropdownToggle(e) {
 async function handleModeOptionClick(e) {
   const mode = e.currentTarget.getAttribute('data-mode');
   await handleGroveModeChange(mode, null);
-  closeDropdown();
 }
 
 /**
@@ -509,7 +528,6 @@ async function handleCellOptionClick(e) {
   e.stopPropagation();
   const cell = e.currentTarget.getAttribute('data-cell');
   await handleGroveModeChange(GROVE_MODES.OTHER_CELL, cell);
-  closeDropdown();
 }
 
 /**
@@ -533,10 +551,20 @@ function closeDropdown() {
  * Handle grove mode change
  */
 async function handleGroveModeChange(mode, cellName = null) {
+  // 1. Update state
   state.groveMode = mode;
   state.selectedCell = cellName;
 
-  // fetch data based on mode
+  // 2. Update dropdown UI (button text and checkmarks)
+  updateModeSelection();
+
+  // 3. Close dropdown menu
+  closeDropdown();
+
+  // 4. Show loading state
+  showLoadingState();
+
+  // 5. Fetch data based on mode
   if (mode === GROVE_MODES.MY) {
     await Promise.all([
       fetchCurrentFruit(),
@@ -549,11 +577,63 @@ async function handleGroveModeChange(mode, cellName = null) {
     await fetchCellFruits(cellName);
   }
 
-  // update UI
-  updateModeSelection();
+  // 6. Update content UI with loaded data
   updateCurrentTree();
   renderCompletedFruits();
   updateStatistics();
+}
+
+/**
+ * Show loading state
+ */
+function showLoadingState() {
+  // Clear current data
+  state.currentFruit = null;
+  state.completedFruits = [];
+
+  // Reset stats to 0
+  if (elements.statsText) {
+    elements.statsText.innerHTML = '전체 <span class="font-semibold text-gray-900">0</span>';
+  }
+
+  // Hide current tree card
+  if (elements.currentTreeCard) {
+    elements.currentTreeCard.style.display = 'none';
+  }
+  if (elements.currentTreeBasketEmoji) {
+    elements.currentTreeBasketEmoji.style.display = 'none';
+  }
+
+  // Remove all existing fruit cards
+  const allCards = elements.gridView.querySelectorAll('.relative.rounded-xl');
+  allCards.forEach(card => {
+    if (card.id !== 'current-tree-card') {
+      card.remove();
+    }
+  });
+
+  // Remove basket fruits
+  const basketViewContainer = elements.basketView.querySelector('.relative.z-10');
+  if (basketViewContainer) {
+    basketViewContainer.querySelectorAll('div:not(#current-tree-basket-emoji)').forEach(fruit => fruit.remove());
+  }
+
+  // Add skeleton
+  const skeleton = document.createElement('div');
+  skeleton.className = 'grid-skeleton rounded-xl bg-gray-100 px-4 py-4 animate-pulse';
+  skeleton.innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-x-2">
+        <div class="w-10 h-10 bg-gray-200 rounded"></div>
+        <div class="space-y-2">
+          <div class="h-3 w-16 bg-gray-200 rounded"></div>
+          <div class="h-3 w-20 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+      <div class="h-3 w-10 bg-gray-200 rounded"></div>
+    </div>
+  `;
+  elements.gridView.insertBefore(skeleton, elements.currentTreeCard);
 }
 
 /**
