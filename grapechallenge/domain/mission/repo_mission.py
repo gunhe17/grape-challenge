@@ -223,8 +223,9 @@ class RepoMission(Repo):
         kst = timezone(timedelta(hours=9)) # UTC+9
         now_kst = datetime.now(kst)
 
-        today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999)
+        # Convert to naive datetime for DB comparison (TIMESTAMP WITHOUT TIME ZONE)
+        today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
+        today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999).replace(tzinfo=None)
 
         query = select(func.count(MissionModel.id)).where(
             and_(
@@ -266,8 +267,9 @@ class RepoMission(Repo):
                 kst = timezone(timedelta(hours=9)) # UTC+9
                 now_kst = datetime.now(kst)
 
-                today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0)
-                today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999)
+                # Convert to naive datetime for DB comparison (TIMESTAMP WITHOUT TIME ZONE)
+                today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
+                today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999).replace(tzinfo=None)
 
                 conditions.append(model_class.created_at >= today_start)
                 conditions.append(model_class.created_at <= today_end)
