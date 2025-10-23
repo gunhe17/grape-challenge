@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
-from typing import List
+from datetime import datetime, timezone, timedelta
+from typing import List, Optional
 
 from grapechallenge.domain.common.error import (
     NotInsertedError,
@@ -10,7 +10,25 @@ from grapechallenge.domain.common.error import (
 )
 
 
+def kst(dt: Optional[datetime]) -> Optional[str]:
+    if not dt:
+        return None
+    
+    from grapechallenge.config import get_app_env
+    app_env = get_app_env()
+
+    if app_env is "dev":
+        return dt.isoformat()
+    
+    if app_env is "prod":
+        kst = timezone(timedelta(hours=9))
+        return dt.replace(tzinfo=timezone.utc).astimezone(kst).isoformat()
+
 class Repo:
+
+    # #
+    # CRUD
+
     @classmethod
     async def insert(cls, *, session: AsyncSession, model_class, data: dict):
         try:

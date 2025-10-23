@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic.dataclasses import dataclass
 from pydantic import ValidationError
 
@@ -10,7 +11,7 @@ class Mission:
     user_id: str
     template_id: str
     fruit_id: str
-    content: Content
+    content: Optional[Content]
 
     # #
     # factory
@@ -22,7 +23,7 @@ class Mission:
         user_id: str,
         template_id: str,
         fruit_id: str,
-        content: Content,
+        content: Optional[Content],
     ) -> "Mission":
         try:
             return cls(
@@ -40,9 +41,9 @@ class Mission:
             user_id=data.get("user_id", None),          #type: ignore
             template_id=data.get("template_id", None),  #type: ignore
             fruit_id=data.get("fruit_id", None),        #type: ignore
-            content=Content.from_str(
-                data.get("content", None)
-            ),
+            content=(
+                Content.from_str(data["content"]) if data["content"] else None
+            )
         )
 
     # #
@@ -53,5 +54,7 @@ class Mission:
             "user_id": self.user_id,
             "template_id": self.template_id,
             "fruit_id": self.fruit_id,
-            "content": self.content.to_str(),
+            "content": (
+                self.content.to_str() if self.content else None
+            )
         }

@@ -6,7 +6,7 @@ from sqlalchemy.future import select
 from uuid import uuid4
 
 from grapechallenge.database.database import Base
-from grapechallenge.domain.common.repo import Repo
+from grapechallenge.domain.common.repo import Repo, kst
 from grapechallenge.domain.mission import Mission
 
 
@@ -17,7 +17,7 @@ class MissionModel(Base):
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     template_id = Column(String(36), ForeignKey("mission_templates.id", ondelete="CASCADE"), nullable=False)
     fruit_id = Column(String(36), ForeignKey("fruits.id", ondelete="CASCADE"), nullable=False)
-    content = Column(String(1000), nullable=False)
+    content = Column(String(1000), nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=None, nullable=True)
 
@@ -59,8 +59,8 @@ class RepoMission(Repo):
     def summary(self) -> dict:
         return {
             "id": self.id,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": kst(self.created_at),
+            "updated_at": kst(self.updated_at),
         }
 
     # #
@@ -210,6 +210,9 @@ class RepoMission(Repo):
             )
             for item in founds
         ]
+    
+    # #
+    # unique
 
     @classmethod
     async def is_template_completed_today(
@@ -219,24 +222,43 @@ class RepoMission(Repo):
         template_id: str
     ) -> bool:
         from datetime import datetime, timezone, timedelta
+        from sqlalchemy import Date, cast
+        from grapechallenge.config import get_app_env
 
-        kst = timezone(timedelta(hours=9)) # UTC+9
-        now_kst = datetime.now(kst)
+        app_env = get_app_env()
 
-        # Convert to naive datetime for DB comparison (TIMESTAMP WITHOUT TIME ZONE)
-        today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
-        today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999).replace(tzinfo=None)
-
-        query = select(func.count(MissionModel.id)).where(
-            and_(
-                MissionModel.user_id == user_id,
-                MissionModel.template_id == template_id,
-                MissionModel.created_at >= today_start,
-                MissionModel.created_at <= today_end
+        if app_env == "dev":
+            # Development: Use UTC
+            today = datetime.now(timezone.utc).date()
+            query = select(func.count(MissionModel.id)).where(
+                and_(
+                    MissionModel.user_id == user_id,
+                    MissionModel.template_id == template_id,
+                    cast(MissionModel.created_at, Date) == today
+                )
             )
-        )
+        else:
+            # Production: Use KST (UTC+9)
+            kst = timezone(timedelta(hours=9))
+            today_kst = datetime.now(kst).date()
+            query = select(func.count(MissionModel.id)).where(
+                and_(
+                    MissionModel.user_id == user_id,
+                    MissionModel.template_id == template_id,
+                    cast(
+                        func.timezone(
+                            'Asia/Seoul',
+                            func.timezone('UTC', MissionModel.created_at)
+                        ),
+                        Date
+                    ) == today_kst
+                )
+            )
+
         result = await session.execute(query)
-        return (result.scalar() or 0) > 0
+        count = result.scalar()
+
+        return (count or 0) > 0
     
     # #
     # joined
@@ -260,19 +282,33 @@ class RepoMission(Repo):
             date: Optional[str] = None
         ):
             from datetime import datetime, timezone, timedelta
+            from sqlalchemy import Date, cast
+            from grapechallenge.config import get_app_env
 
             conditions = [MissionTemplateModel.name == name]
 
             if date == "today":
-                kst = timezone(timedelta(hours=9)) # UTC+9
-                now_kst = datetime.now(kst)
+                app_env = get_app_env()
 
-                # Convert to naive datetime for DB comparison (TIMESTAMP WITHOUT TIME ZONE)
-                today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
-                today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999).replace(tzinfo=None)
-
-                conditions.append(model_class.created_at >= today_start)
-                conditions.append(model_class.created_at <= today_end)
+                if app_env == "dev":
+                    # Development: Use UTC
+                    today = datetime.now(timezone.utc).date()
+                    conditions.append(
+                        cast(model_class.created_at, Date) == today
+                    )
+                else:
+                    # Production: Use KST (UTC+9)
+                    kst = timezone(timedelta(hours=9))
+                    today_kst = datetime.now(kst).date()
+                    conditions.append(
+                        cast(
+                            func.timezone(
+                                'Asia/Seoul',
+                                func.timezone('UTC', model_class.created_at)
+                            ),
+                            Date
+                        ) == today_kst
+                    )
 
             query = select(
                 model_class,

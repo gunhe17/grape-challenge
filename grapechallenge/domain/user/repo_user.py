@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
 from grapechallenge.database.database import Base
-from grapechallenge.domain.common.repo import Repo
+from grapechallenge.domain.common.repo import Repo, kst
 from grapechallenge.domain.user import User
 
 
@@ -53,13 +53,11 @@ class RepoUser(Repo):
             "updated_at": updated_at,
         }
 
-    def summary(
-        self
-    ) -> dict:
+    def summary(self) -> dict:
         return {
             "id": self.id,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": kst(self.created_at),
+            "updated_at": kst(self.updated_at),
         }
 
     # #

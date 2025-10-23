@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
 from grapechallenge.database.database import Base
-from grapechallenge.domain.common.repo import Repo
+from grapechallenge.domain.common.repo import Repo, kst
 from grapechallenge.domain.fruit import Fruit
 
 
@@ -57,8 +57,8 @@ class RepoFruit(Repo):
     def summary(self) -> dict:
         return {
             "id": self.id,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": kst(self.created_at),
+            "updated_at": kst(self.updated_at),
         }
 
     # #
@@ -182,12 +182,14 @@ class RepoFruit(Repo):
         session: AsyncSession,
         user_id: str
     ) -> Optional[dict]:
-        from grapechallenge.domain.fruit_template import FruitTemplateModel
+        
         async def find_my_in_progress_with_template(
             session: AsyncSession,
             model_class,
             user_id: str
         ):
+            from grapechallenge.domain.fruit_template import FruitTemplateModel
+
             query = select(model_class, FruitTemplateModel).where(
                 model_class.user_id == user_id,
                 model_class.status != "COMPLETED"
@@ -225,12 +227,13 @@ class RepoFruit(Repo):
         session: AsyncSession,
         user_id: str
     ) -> Optional[List[dict]]:
-        from grapechallenge.domain.fruit_template import FruitTemplateModel
+        
         async def find_by_user_id_with_template(
             session: AsyncSession,
             model_class,
             user_id: str
         ):
+            from grapechallenge.domain.fruit_template import FruitTemplateModel
             query = select(
                 model_class,
                 FruitTemplateModel

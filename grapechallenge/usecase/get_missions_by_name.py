@@ -5,6 +5,7 @@ from fastapi import Request
 
 from grapechallenge.domain.mission import RepoMission
 from grapechallenge.usecase.common.models import UsecaseOutput
+from grapechallenge.usecase.common.kst import kst
 
 
 class GetMissionsByNameInput(BaseModel):
@@ -36,7 +37,7 @@ async def get_missions_by_name(session: AsyncSession, request: Request, input: G
                     "id": found.get("mission_id", None),
                     "name": found.get("template_name", None),
                     "content": found.get("mission_content", None),
-                    "content_created_at": found.get("mission_created_at").isoformat() if found.get("mission_created_at") else None, # type:ignore
+                    "content_created_at": kst(found.get("mission_created_at")), # type:ignore
                     "user_id": found.get("user_id", None),
                     "user_cell": found.get("user_cell", None),
                     "user_name": found.get("user_name", None),

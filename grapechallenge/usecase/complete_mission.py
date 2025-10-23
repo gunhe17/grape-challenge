@@ -37,7 +37,9 @@ async def complete_mission(session: AsyncSession, request: Request, input: Compl
             template_id=(
                 found_templates.id
             ),
-            content=Content.from_str(input.content or ""),
+            content=(
+                Content.from_str(input.content) if input.content else None
+            )
         )
     )
 

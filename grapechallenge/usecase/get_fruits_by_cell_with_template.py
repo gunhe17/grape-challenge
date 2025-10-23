@@ -4,6 +4,7 @@ from fastapi import Request
 
 from grapechallenge.domain.fruit import RepoFruit
 from grapechallenge.usecase.common.models import UsecaseOutput
+from grapechallenge.usecase.common.kst import kst
 
 
 class GetFruitsByCellWithTemplateInput(BaseModel):
@@ -42,8 +43,8 @@ async def get_fruits_by_cell_with_template(session: AsyncSession, request: Reque
                     "fifth_status": found.get("fifth_status", None),
                     "sixth_status": found.get("sixth_status", None),
                     "seventh_status": found.get("seventh_status", None),
-                    "created_at": found.get("created_at").isoformat() if found.get("created_at") else None, # type:ignore
-                    "updated_at": found.get("updated_at").isoformat() if found.get("updated_at") else None, # type:ignore
+                    "created_at": kst(found.get("created_at")), # type:ignore
+                    "updated_at": kst(found.get("updated_at")), # type:ignore
                 }
                 for found in founds
             ],

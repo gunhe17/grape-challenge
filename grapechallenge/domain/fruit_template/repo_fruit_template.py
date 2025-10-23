@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String, DateTime, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
 from grapechallenge.database.database import Base
-from grapechallenge.domain.common.repo import Repo
+from grapechallenge.domain.common.repo import Repo, kst
 from grapechallenge.domain.fruit_template import FruitTemplate
 
 
@@ -63,8 +63,8 @@ class RepoFruitTemplate(Repo):
     def summary(self) -> dict:
         return {
             "id": self.id,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": kst(self.created_at),
+            "updated_at": kst(self.updated_at),
         }
 
     # #
@@ -245,34 +245,38 @@ class RepoFruitTemplate(Repo):
         cls,
         session: AsyncSession
     ) -> Optional[List["RepoFruitTemplate"]]:
+        
+        async def find_all(
+            session: AsyncSession,
+            model_class
+        ):
+            query = select(model_class)
+            result = await session.execute(query)
+            return result.scalars().all()
+        
+        founds = await find_all(session, FruitTemplateModel)
 
-        try:
-            from sqlalchemy import select
-            result = await session.execute(select(FruitTemplateModel))
-            founds = result.scalars().all()
+        if not founds:
+            return None
 
-            if not founds:
-                return None
-
-            return [
-                cls(
-                    id=item.id,
-                    fruit_template=FruitTemplate.from_dict({
-                        "name": item.name,
-                        "type": item.type,
-                        "first_status": item.first_status,
-                        "second_status": item.second_status,
-                        "third_status": item.third_status,
-                        "fourth_status": item.fourth_status,
-                        "fifth_status": item.fifth_status,
-                        "sixth_status": item.sixth_status,
-                        "seventh_status": item.seventh_status,
-                    }),
-                    created_at=item.created_at,
-                    updated_at=item.updated_at,
-                )
-                for item in founds
-            ]
-        except Exception as e:
-            from grapechallenge.domain.common.error import NotFoundError
-            raise NotFoundError(target="fruit_templates", exception=e)
+        return [
+            cls(
+                id=item.id,
+                fruit_template=FruitTemplate.from_dict({
+                    "name": item.name,
+                    "type": item.type,
+                    "first_status": item.first_status,
+                    "second_status": item.second_status,
+                    "third_status": item.third_status,
+                    "fourth_status": item.fourth_status,
+                    "fifth_status": item.fifth_status,
+                    "sixth_status": item.sixth_status,
+                    "seventh_status": item.seventh_status,
+                }),
+                created_at=item.created_at,
+                updated_at=(
+                    item.updated_at if item.updated_at else None
+                ),
+            )
+            for item in founds
+        ]

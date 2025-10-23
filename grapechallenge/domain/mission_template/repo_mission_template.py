@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String, DateTime, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
 from grapechallenge.database.database import Base
-from grapechallenge.domain.common.repo import Repo
+from grapechallenge.domain.common.repo import Repo, kst
 from grapechallenge.domain.mission_template import MissionTemplate
 
 
@@ -57,8 +57,8 @@ class RepoMissionTemplate(Repo):
     def summary(self) -> dict:
         return {
             "id": self.id,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": kst(self.created_at),
+            "updated_at": kst(self.updated_at),
         }
 
     # #
@@ -178,11 +178,16 @@ class RepoMissionTemplate(Repo):
         cls,
         session: AsyncSession
     ) -> Optional[List["RepoMissionTemplate"]]:
-        from sqlalchemy.future import select
-
-        query = select(MissionTemplateModel)
-        result = await session.execute(query)
-        founds = result.scalars().all()
+        
+        async def find_all(
+            session: AsyncSession,
+            model_class
+        ):
+            query = select(model_class)
+            result = await session.execute(query)
+            return result.scalars().all()
+        
+        founds = await find_all(session, MissionTemplateModel)
 
         if not founds:
             return None
