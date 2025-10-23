@@ -9,7 +9,16 @@
       "Bash(mkdir -p /Users/gunhee/Workspace/codespace/project/grape-challenge/grapechallenge/template/js)",
       "Bash(mkdir -p /Users/gunhee/Workspace/codespace/project/grape-challenge/grapechallenge/template/components)",
       "Bash(mkdir -p /Users/gunhee/Workspace/codespace/project/grape-challenge/grapechallenge/template/css)",
-      "Bash(mv /Users/gunhee/Workspace/codespace/project/grape-challenge/grapechallenge/usecase/get_users_by_cell.py /Users/gunhee/Workspace/codespace/project/grape-challenge/grapechallenge/usecase/get_fruits_by_cell_with_template.py)"
+      "Bash(mv /Users/gunhee/Workspace/codespace/project/grape-challenge/grapechallenge/usecase/get_users_by_cell.py /Users/gunhee/Workspace/codespace/project/grape-challenge/grapechallenge/usecase/get_fruits_by_cell_with_template.py)",
+      "Bash(psql grape_dev -c 'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"\"user\"\";')",
+      "Bash(psql grape_dev -c 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"\"user\"\";')",
+      "Bash(psql grape_dev -c 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO \"\"user\"\";')",
+      "Bash(psql grape_dev -c \"UPDATE fruit_templates SET seventh_status = ''/images/tangie1.svg'' WHERE id = ''1a00a17e-2f9f-41f4-8dad-25dee29e1b18'';\")",
+      "Bash(psql grape_dev -c \"SELECT id, name, seventh_status FROM fruit_templates WHERE id = ''1a00a17e-2f9f-41f4-8dad-25dee29e1b18'';\")",
+      "Bash(psql grape_dev -c \"SELECT id, name, status, seventh_status FROM fruits WHERE fruit_template_id = ''1a00a17e-2f9f-41f4-8dad-25dee29e1b18'' LIMIT 5;\")",
+      "Bash(psql grape_dev -c \"\\d fruits\")",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(psql grape_dev -c \"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ''fruits'' ORDER BY ordinal_position;\")"
     ],
     "deny": [],
     "ask": []

@@ -19,6 +19,7 @@ app.mount("/static", StaticFiles(directory=str(BASE_PATH / "template")), name="s
 app.mount("/js", StaticFiles(directory=str(BASE_PATH / "template" / "js")), name="js")
 app.mount("/components", StaticFiles(directory=str(BASE_PATH / "template" / "components")), name="components")
 app.mount("/css", StaticFiles(directory=str(BASE_PATH / "template" / "css")), name="css")
+app.mount("/images", StaticFiles(directory=str(BASE_PATH / "template" / "images")), name="images")
 
 
 # #
@@ -83,6 +84,10 @@ Router(
 # Mission
 Router(
     "/mission/complete", ["POST"], mission.post_mission
+).register(app)
+
+Router(
+    "/mission/test", ["POST"], mission.post_test_mission
 ).register(app)
 
 # Template

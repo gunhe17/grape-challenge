@@ -1,4 +1,5 @@
 from .complete_mission import CompleteMissionInput, complete_mission
+from .complete_test_mission import CompleteTestMissionInput, complete_test_mission
 
 from .count_my_completed_fruits import CountMyCompletedFruitsInput, count_my_completed_fruits
 

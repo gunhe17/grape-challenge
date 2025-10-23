@@ -141,5 +141,32 @@ export const FruitAPI = {
       console.error('과일 수확 오류:', error);
       return null;
     }
+  },
+
+  /**
+   * 테스트 미션 완료 (dev 전용, 제한 없음)
+   * @param {string} fruitId - 과일 ID
+   * @returns {Promise<Object|null>} 완료된 미션 정보 또는 null
+   */
+  async completeTestMission(fruitId) {
+    try {
+      const response = await fetch('/mission/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fruit_id: fruitId })
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('테스트 미션 완료 실패:', response.status, text);
+        return null;
+      }
+
+      const data = await response.json();
+      return data.fruit_id ? data : null;
+    } catch (error) {
+      console.error('테스트 미션 완료 오류:', error);
+      return null;
+    }
   }
 };

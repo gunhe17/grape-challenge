@@ -145,6 +145,9 @@
   <script type="module">
     import { initHomePage } from '/static/js/pages/homePage.js';
 
+    // APP_ENV를 전역으로 설정
+    window.APP_ENV = "{{ app_env }}";
+
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', async function() {
       await initHomePage();

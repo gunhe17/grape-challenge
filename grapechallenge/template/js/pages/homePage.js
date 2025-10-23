@@ -131,6 +131,14 @@ async function updateMissions(fruit) {
     container.appendChild(card);
     cardIndex++;
   }
+
+  // Add test mission card in dev environment
+  if (window.APP_ENV === 'dev') {
+    const testCard = MissionCard.createTestMissionCard(handleTestMission);
+    testCard.style.animationDelay = `${cardIndex * UI_CONSTANTS.ANIMATION_DELAY_STEP}s`;
+    container.appendChild(testCard);
+    cardIndex++;
+  }
 }
 
 // ========================
@@ -303,6 +311,25 @@ async function handleHarvest(event) {
   } else {
     alert('수확 중 오류가 발생했습니다.');
     btn.textContent = '수확하기';
+    btn.disabled = false;
+  }
+}
+
+async function handleTestMission(event) {
+  const btn = event.target;
+  if (!currentFruit) return;
+
+  btn.disabled = true;
+  btn.textContent = '완료 중...';
+
+  const result = await FruitAPI.completeTestMission(currentFruit.fruit_id);
+
+  if (result) {
+    await fetchAndUpdateFruit();
+    updateUI();
+  } else {
+    alert('테스트 미션 완료 중 오류가 발생했습니다.');
+    btn.textContent = '완료';
     btn.disabled = false;
   }
 }

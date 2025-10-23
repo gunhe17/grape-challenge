@@ -128,17 +128,17 @@
         <!-- Grid View -->
         <div id="grid-view" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 px-2">
           <!-- In Progress Fruit (Current Tree) -->
-          <div id="current-tree-card" class="relative rounded-xl bg-white px-5 py-5 shadow-sm outline outline-1 -outline-offset-1 outline-orange-200 hover:outline-orange-300 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-x-2.5">
-                  <span id="current-tree-emoji" class="text-4xl">🌱</span>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">현재 나무</p>
-                    <p class="text-xs text-orange-600">진행중 <span id="current-tree-progress">0</span>%</p>
-                    <p id="current-tree-stage" class="text-xs text-gray-600">1단계 · 씨앗</p>
-                  </div>
+          <div id="current-tree-card" class="relative rounded-xl bg-white px-4 py-4 shadow-sm outline outline-2 -outline-offset-1 outline-green-400 hover:outline-green-500 transition-all hover:shadow-md">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-x-2">
+                <span id="current-tree-emoji" class="text-4xl">🌱</span>
+                <div>
+                  <p id="current-tree-name" class="text-xs font-semibold text-gray-900">현재 나무</p>
+                  <p id="current-tree-date" class="text-xs text-gray-600">2025.01.01</p>
                 </div>
+              </div>
+              <div>
+                <p class="text-xs text-green-600 text-right">진행중</p>
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
+from grapechallenge.config import get_app_env
 
 # Setup Jinja2 templates
 BASE_PATH = Path(__file__).resolve().parent.parent
@@ -69,9 +70,11 @@ def get_current_user(request: Request) -> dict:
 @require_auth()
 async def home_page(request: Request) -> HTMLResponse:
     user = get_current_user(request)
+    app_env = get_app_env()
     return templates.TemplateResponse("home.html", {
         "request": request,
-        "user": user
+        "user": user,
+        "app_env": app_env
     })
 
 

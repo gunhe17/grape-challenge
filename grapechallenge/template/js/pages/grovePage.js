@@ -3,9 +3,29 @@
  * 과수원 페이지의 비즈니스 로직과 이벤트 핸들러
  */
 
-import { getStageInfo, getStatusImage, isImageUrl, calculateProgress, formatDate } from '../utils/helpers.js';
+import { getStageInfo, getStatusImage, isImageUrl, formatDate } from '../utils/helpers.js';
 import { FRUIT_STATUS } from '../utils/constants.js';
 import { AuthAPI } from '../api/authApi.js';
+
+// ========================
+// Constants
+// ========================
+const GROVE_MODES = {
+  MY: 'my',
+  CELL: 'cell',
+  OTHER_CELL: 'other-cell'
+};
+
+const MODE_TEXTS = {
+  [GROVE_MODES.MY]: '나의 과수원',
+  [GROVE_MODES.CELL]: '우리 셀의 과수원',
+  [GROVE_MODES.OTHER_CELL]: '과수원'
+};
+
+const IMAGE_SIZES = {
+  GRID: 'w-10 h-10',
+  BASKET: 'w-12 h-12'
+};
 
 // ========================
 // State Management
@@ -13,7 +33,7 @@ import { AuthAPI } from '../api/authApi.js';
 const state = {
   currentFruit: null,
   completedFruits: [],
-  groveMode: 'my', // 'my', 'cell', or 'other-cell'
+  groveMode: GROVE_MODES.MY,
   selectedCell: null,
   allCells: []
 };
@@ -41,10 +61,14 @@ const elements = {
   // cards
   currentTreeCard: null,
   currentTreeEmoji: null,
-  currentTreeProgress: null,
-  currentTreeStage: null,
+  currentTreeName: null,
+  currentTreeDate: null,
   currentTreeBasketEmoji: null
 };
+
+// ========================
+// Initialization
+// ========================
 
 /**
  * Initialize DOM elements cache
@@ -65,25 +89,9 @@ function cacheElements() {
 
   elements.currentTreeCard = document.getElementById('current-tree-card');
   elements.currentTreeEmoji = document.getElementById('current-tree-emoji');
-  elements.currentTreeProgress = document.getElementById('current-tree-progress');
-  elements.currentTreeStage = document.getElementById('current-tree-stage');
+  elements.currentTreeName = document.getElementById('current-tree-name');
+  elements.currentTreeDate = document.getElementById('current-tree-date');
   elements.currentTreeBasketEmoji = document.getElementById('current-tree-basket-emoji');
-}
-
-// ========================
-// Initialization
-// ========================
-export async function initGrovePage() {
-  cacheElements();
-  await Promise.all([
-    fetchCurrentFruit(),
-    fetchCompletedFruits(),
-    fetchAllCells()
-  ]);
-  updateCurrentTree();
-  renderCompletedFruits();
-  updateStatistics();
-  setupEventListeners();
 }
 
 /**
@@ -105,42 +113,23 @@ function setupEventListeners() {
 }
 
 /**
- * Handle dropdown toggle
+ * Initialize grove page
  */
-function handleDropdownToggle(e) {
-  e.stopPropagation();
-  const isHidden = elements.groveModeMenu.classList.toggle('hidden');
-  elements.groveModeButton.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
-}
-
-/**
- * Handle mode option click
- */
-async function handleModeOptionClick(e) {
-  const mode = e.currentTarget.getAttribute('data-mode');
-  await handleGroveModeChange(mode, null);
-  closeDropdown();
-}
-
-/**
- * Handle outside click to close dropdown
- */
-function handleOutsideClick() {
-  if (!elements.groveModeMenu.classList.contains('hidden')) {
-    closeDropdown();
-  }
-}
-
-/**
- * Close dropdown menu
- */
-function closeDropdown() {
-  elements.groveModeMenu.classList.add('hidden');
-  elements.groveModeButton.setAttribute('aria-expanded', 'false');
+export async function initGrovePage() {
+  cacheElements();
+  await Promise.all([
+    fetchCurrentFruit(),
+    fetchCompletedFruits(),
+    fetchAllCells()
+  ]);
+  updateCurrentTree();
+  renderCompletedFruits();
+  updateStatistics();
+  setupEventListeners();
 }
 
 // ========================
-// API 호출 함수
+// API Functions
 // ========================
 
 /**
@@ -259,8 +248,39 @@ async function fetchCellFruits(cellName = null) {
 }
 
 // ========================
-// UI 업데이트 함수
+// Rendering Functions
 // ========================
+
+/**
+ * Render image or emoji element
+ * @param {string} image - Image URL or emoji
+ * @param {string} size - Size class (e.g., 'w-10 h-10')
+ * @param {string} fruitName - Fruit name for alt text
+ * @returns {string} HTML string
+ */
+function renderImageElement(image, size, fruitName = 'fruit') {
+  if (isImageUrl(image)) {
+    return `<img src="${image}" alt="${fruitName}" class="${size} object-contain">`;
+  }
+  return `<div class="${size} flex items-center justify-center text-2xl">${image}</div>`;
+}
+
+/**
+ * Update image element (for dynamic updates)
+ * @param {HTMLElement} element - DOM element to update
+ * @param {string} image - Image URL or emoji
+ * @param {string} size - Size class
+ * @param {string} additionalClasses - Additional CSS classes
+ */
+function updateImageElement(element, image, size, additionalClasses = '') {
+  if (isImageUrl(image)) {
+    element.innerHTML = `<img src="${image}" alt="fruit" class="${size} object-contain">`;
+    element.className = additionalClasses;
+  } else {
+    element.textContent = image;
+    element.className = `${size} flex items-center justify-center text-2xl ${additionalClasses}`.trim();
+  }
+}
 
 /**
  * Render cell options in dropdown
@@ -282,12 +302,16 @@ function renderCellOptions() {
     return;
   }
 
+  const checkmarkSvg = `
+    <svg class="cell-check hidden w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+    </svg>
+  `;
+
   elements.otherCellsContainer.innerHTML = otherCells.map(cell => `
     <button data-cell="${cell}" class="cell-option w-full text-left px-4 py-2.5 hover:bg-orange-50 transition-colors flex items-center justify-between">
       <span class="text-sm font-medium text-gray-900">${cell}의 과수원</span>
-      <svg class="cell-check hidden w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-      </svg>
+      ${checkmarkSvg}
     </button>
   `).join('');
 
@@ -298,20 +322,10 @@ function renderCellOptions() {
 }
 
 /**
- * Handle cell option click
- */
-async function handleCellOptionClick(e) {
-  e.stopPropagation();
-  const cell = e.currentTarget.getAttribute('data-cell');
-  await handleGroveModeChange('other-cell', cell);
-  closeDropdown();
-}
-
-/**
  * Update current tree display
  */
 function updateCurrentTree() {
-  const shouldShow = state.groveMode === 'my' && state.currentFruit;
+  const shouldShow = state.groveMode === GROVE_MODES.MY && state.currentFruit;
 
   elements.currentTreeCard.style.display = shouldShow ? 'block' : 'none';
   elements.currentTreeBasketEmoji.style.display = shouldShow ? 'block' : 'none';
@@ -319,26 +333,23 @@ function updateCurrentTree() {
   if (!shouldShow) return;
 
   const stageInfo = getStageInfo(state.currentFruit.status);
-  const progress = calculateProgress(state.currentFruit.status);
   const image = getStatusImage(state.currentFruit);
+  const fruitName = state.currentFruit.name || '과일';
+  const displayDate = state.currentFruit.created_at ? formatDate(state.currentFruit.created_at) : '';
 
   // update grid view
-  if (isImageUrl(image)) {
-    elements.currentTreeEmoji.innerHTML = `<img src="${image}" alt="fruit" class="w-20 h-20 object-contain">`;
-  } else {
-    elements.currentTreeEmoji.textContent = image;
-  }
-
-  elements.currentTreeProgress.textContent = Math.round(progress);
-  elements.currentTreeStage.textContent = `${stageInfo.level}단계 · ${stageInfo.name}`;
+  elements.currentTreeName.textContent = fruitName;
+  elements.currentTreeDate.textContent = displayDate;
+  updateImageElement(elements.currentTreeEmoji, image, IMAGE_SIZES.GRID);
 
   // update basket view
-  if (isImageUrl(image)) {
-    elements.currentTreeBasketEmoji.innerHTML = `<img src="${image}" alt="fruit" class="w-16 h-16 object-contain">`;
-  } else {
-    elements.currentTreeBasketEmoji.textContent = image;
-  }
-  elements.currentTreeBasketEmoji.setAttribute('title', `현재 나무 - ${stageInfo.level}단계 ${stageInfo.name}`);
+  updateImageElement(
+    elements.currentTreeBasketEmoji,
+    image,
+    IMAGE_SIZES.BASKET,
+    'transform hover:scale-110 transition-transform cursor-pointer'
+  );
+  elements.currentTreeBasketEmoji.setAttribute('title', `${fruitName} - ${stageInfo.level}단계 ${stageInfo.name}`);
 }
 
 /**
@@ -347,14 +358,19 @@ function updateCurrentTree() {
 function renderCompletedFruits() {
   const basketViewContainer = elements.basketView.querySelector('.relative.z-10');
 
-  // remove existing completed fruit cards
-  elements.gridView.querySelectorAll('.relative.rounded-2xl:not(#current-tree-card)').forEach(card => card.remove());
+  // remove existing completed fruit cards (but keep current tree card)
+  const allCards = elements.gridView.querySelectorAll('.relative.rounded-xl');
+  allCards.forEach(card => {
+    if (card.id !== 'current-tree-card') {
+      card.remove();
+    }
+  });
   basketViewContainer.querySelectorAll('div:not(#current-tree-basket-emoji)').forEach(fruit => fruit.remove());
 
   // render completed fruits (newest first)
   [...state.completedFruits].reverse().forEach((fruit) => {
     const image = fruit.seventh_status || '🍎';
-    const fruitName = fruit.template_name || '과일';
+    const fruitName = fruit.name || '과일';
     const displayDate = fruit.updated_at ? formatDate(fruit.updated_at) : '';
 
     // insert into grid view
@@ -370,27 +386,29 @@ function renderCompletedFruits() {
 }
 
 /**
- * 과일 카드 생성 (그리드 뷰용)
+ * Create fruit card for grid view
+ * @param {string} image - Image URL or emoji
+ * @param {string} fruitName - Fruit name
+ * @param {string} displayDate - Display date
+ * @returns {HTMLElement} Fruit card element
  */
 function createFruitCard(image, fruitName, displayDate) {
   const card = document.createElement('div');
-  card.className = 'relative rounded-2xl bg-white px-6 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md';
+  card.className = 'relative rounded-xl bg-white px-4 py-4 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all hover:shadow-md';
 
-  const imageHtml = isImageUrl(image)
-    ? `<img src="${image}" alt="${fruitName}" class="w-20 h-20 object-contain mr-2">`
-    : `<span class="text-5xl mr-2">${image}</span>`;
+  const imageHtml = renderImageElement(image, IMAGE_SIZES.GRID, fruitName);
 
   card.innerHTML = `
-    <div class="flex items-start justify-between">
-      <div class="flex-1">
-        <div class="flex items-center gap-x-3">
-          ${imageHtml}
-          <div>
-            <p class="text-sm font-semibold text-gray-900">${fruitName}</p>
-            <p class="text-xs text-green-600">완성</p>
-            <p class="text-xs text-gray-600">${displayDate}</p>
-          </div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-x-2">
+        ${imageHtml}
+        <div>
+          <p class="text-xs font-semibold text-gray-900">${fruitName}</p>
+          <p class="text-xs text-gray-600">${displayDate}</p>
         </div>
+      </div>
+      <div>
+        <p class="text-xs text-green-600 text-right">완성</p>
       </div>
     </div>
   `;
@@ -399,7 +417,11 @@ function createFruitCard(image, fruitName, displayDate) {
 }
 
 /**
- * 바구니 과일 생성 (바구니 뷰용)
+ * Create fruit element for basket view
+ * @param {string} image - Image URL or emoji
+ * @param {string} fruitName - Fruit name
+ * @param {string} displayDate - Display date
+ * @returns {HTMLElement} Basket fruit element
  */
 function createBasketFruit(image, fruitName, displayDate) {
   const basketFruit = document.createElement('div');
@@ -407,9 +429,9 @@ function createBasketFruit(image, fruitName, displayDate) {
   basketFruit.title = `${fruitName} - ${displayDate}`;
 
   if (isImageUrl(image)) {
-    basketFruit.innerHTML = `<img src="${image}" alt="${fruitName}" class="w-24 h-24 object-contain">`;
+    basketFruit.innerHTML = `<img src="${image}" alt="${fruitName}" class="${IMAGE_SIZES.BASKET} object-contain">`;
   } else {
-    basketFruit.className += ' text-6xl';
+    basketFruit.className += ` ${IMAGE_SIZES.BASKET} flex items-center justify-center text-3xl`;
     basketFruit.textContent = image;
   }
 
@@ -420,7 +442,7 @@ function createBasketFruit(image, fruitName, displayDate) {
  * Update statistics display
  */
 function updateStatistics() {
-  const inProgressCount = (state.groveMode === 'my' && state.currentFruit) ? 1 : 0;
+  const inProgressCount = (state.groveMode === GROVE_MODES.MY && state.currentFruit) ? 1 : 0;
   const total = state.completedFruits.length + inProgressCount;
 
   if (elements.statsText) {
@@ -430,9 +452,82 @@ function updateStatistics() {
   }
 }
 
+/**
+ * Update mode selection UI
+ */
+function updateModeSelection() {
+  // update button text
+  const displayText = state.groveMode === GROVE_MODES.OTHER_CELL && state.selectedCell
+    ? `${state.selectedCell}의 과수원`
+    : MODE_TEXTS[state.groveMode];
+
+  elements.groveModeText.textContent = displayText;
+
+  // update checkmarks for main options
+  document.querySelectorAll('.grove-mode-option').forEach(option => {
+    const check = option.querySelector('.mode-check');
+    const optionMode = option.getAttribute('data-mode');
+    const shouldShow = optionMode === state.groveMode && state.groveMode !== GROVE_MODES.OTHER_CELL;
+    check.classList.toggle('hidden', !shouldShow);
+  });
+
+  // update checkmarks for cell options
+  document.querySelectorAll('.cell-option').forEach(option => {
+    const check = option.querySelector('.cell-check');
+    const cellName = option.getAttribute('data-cell');
+    const shouldShow = state.groveMode === GROVE_MODES.OTHER_CELL && cellName === state.selectedCell;
+    check.classList.toggle('hidden', !shouldShow);
+  });
+}
+
 // ========================
-// 이벤트 핸들러
+// Event Handlers
 // ========================
+
+/**
+ * Handle dropdown toggle
+ */
+function handleDropdownToggle(e) {
+  e.stopPropagation();
+  const isHidden = elements.groveModeMenu.classList.toggle('hidden');
+  elements.groveModeButton.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+}
+
+/**
+ * Handle mode option click
+ */
+async function handleModeOptionClick(e) {
+  const mode = e.currentTarget.getAttribute('data-mode');
+  await handleGroveModeChange(mode, null);
+  closeDropdown();
+}
+
+/**
+ * Handle cell option click
+ */
+async function handleCellOptionClick(e) {
+  e.stopPropagation();
+  const cell = e.currentTarget.getAttribute('data-cell');
+  await handleGroveModeChange(GROVE_MODES.OTHER_CELL, cell);
+  closeDropdown();
+}
+
+/**
+ * Handle outside click to close dropdown
+ */
+function handleOutsideClick() {
+  if (!elements.groveModeMenu.classList.contains('hidden')) {
+    closeDropdown();
+  }
+}
+
+/**
+ * Close dropdown menu
+ */
+function closeDropdown() {
+  elements.groveModeMenu.classList.add('hidden');
+  elements.groveModeButton.setAttribute('aria-expanded', 'false');
+}
 
 /**
  * Handle grove mode change
@@ -442,9 +537,15 @@ async function handleGroveModeChange(mode, cellName = null) {
   state.selectedCell = cellName;
 
   // fetch data based on mode
-  if (mode === 'my') {
-    await fetchCompletedFruits();
-  } else if (mode === 'cell' || (mode === 'other-cell' && cellName)) {
+  if (mode === GROVE_MODES.MY) {
+    await Promise.all([
+      fetchCurrentFruit(),
+      fetchCompletedFruits()
+    ]);
+  } else if (mode === GROVE_MODES.CELL) {
+    const userCell = getUserCellSync();
+    await fetchCellFruits(userCell);
+  } else if (mode === GROVE_MODES.OTHER_CELL && cellName) {
     await fetchCellFruits(cellName);
   }
 
@@ -456,36 +557,7 @@ async function handleGroveModeChange(mode, cellName = null) {
 }
 
 /**
- * Update mode selection UI
- */
-function updateModeSelection() {
-  // update button text
-  const modeTexts = {
-    'my': '나의 과수원',
-    'cell': '우리 셀의 과수원',
-    'other-cell': state.selectedCell ? `${state.selectedCell}의 과수원` : '과수원'
-  };
-  elements.groveModeText.textContent = modeTexts[state.groveMode];
-
-  // update checkmarks for main options
-  document.querySelectorAll('.grove-mode-option').forEach(option => {
-    const check = option.querySelector('.mode-check');
-    const optionMode = option.getAttribute('data-mode');
-    const shouldShow = optionMode === state.groveMode && state.groveMode !== 'other-cell';
-    check.classList.toggle('hidden', !shouldShow);
-  });
-
-  // update checkmarks for cell options
-  document.querySelectorAll('.cell-option').forEach(option => {
-    const check = option.querySelector('.cell-check');
-    const cellName = option.getAttribute('data-cell');
-    const shouldShow = state.groveMode === 'other-cell' && cellName === state.selectedCell;
-    check.classList.toggle('hidden', !shouldShow);
-  });
-}
-
-/**
- * 로그아웃 핸들러
+ * Handle logout
  */
 async function handleLogout() {
   if (!confirm('로그아웃 하시겠습니까?')) return;
@@ -495,32 +567,33 @@ async function handleLogout() {
 }
 
 // ========================
-// 뷰 토글 함수 (전역으로 노출)
+// View Toggle Functions
 // ========================
 
 /**
- * 그리드/바구니 뷰 전환
- * @param {string} view - 'grid' 또는 'basket'
+ * Toggle between grid and basket views
+ * @param {string} view - 'grid' or 'basket'
  */
 export function toggleView(view) {
-  const gridView = document.getElementById('grid-view');
-  const basketView = document.getElementById('basket-view');
-  const gridBtn = document.getElementById('grid-btn');
-  const basketBtn = document.getElementById('basket-btn');
+  const isGridView = view === 'grid';
 
-  if (view === 'grid') {
-    gridView.classList.remove('hidden');
-    basketView.classList.add('hidden');
-    gridBtn.classList.add('bg-orange-100', 'text-orange-700');
-    gridBtn.classList.remove('text-gray-700', 'hover:bg-gray-100');
-    basketBtn.classList.remove('bg-orange-100', 'text-orange-700');
-    basketBtn.classList.add('text-gray-700', 'hover:bg-gray-100');
+  // toggle view visibility
+  elements.gridView.classList.toggle('hidden', !isGridView);
+  elements.basketView.classList.toggle('hidden', isGridView);
+
+  // update button states
+  const activeClasses = ['bg-orange-100', 'text-orange-700'];
+  const inactiveClasses = ['text-gray-700', 'hover:bg-gray-100'];
+
+  if (isGridView) {
+    elements.gridBtn.classList.add(...activeClasses);
+    elements.gridBtn.classList.remove(...inactiveClasses);
+    elements.basketBtn.classList.remove(...activeClasses);
+    elements.basketBtn.classList.add(...inactiveClasses);
   } else {
-    gridView.classList.add('hidden');
-    basketView.classList.remove('hidden');
-    basketBtn.classList.add('bg-orange-100', 'text-orange-700');
-    basketBtn.classList.remove('text-gray-700', 'hover:bg-gray-100');
-    gridBtn.classList.remove('bg-orange-100', 'text-orange-700');
-    gridBtn.classList.add('text-gray-700', 'hover:bg-gray-100');
+    elements.basketBtn.classList.add(...activeClasses);
+    elements.basketBtn.classList.remove(...inactiveClasses);
+    elements.gridBtn.classList.remove(...activeClasses);
+    elements.gridBtn.classList.add(...inactiveClasses);
   }
 }
