@@ -218,11 +218,20 @@ class RepoMission(Repo):
         user_id: str,
         template_id: str
     ) -> bool:
+        from datetime import datetime, timezone, timedelta
+
+        kst = timezone(timedelta(hours=9)) # UTC+9
+        now_kst = datetime.now(kst)
+
+        today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999)
+
         query = select(func.count(MissionModel.id)).where(
             and_(
                 MissionModel.user_id == user_id,
                 MissionModel.template_id == template_id,
-                func.date(MissionModel.created_at) == func.current_date()
+                MissionModel.created_at >= today_start,
+                MissionModel.created_at <= today_end
             )
         )
         result = await session.execute(query)
@@ -249,13 +258,19 @@ class RepoMission(Repo):
             name: str,
             date: Optional[str] = None
         ):
+            from datetime import datetime, timezone, timedelta
+
             conditions = [MissionTemplateModel.name == name]
 
-            # Add date filter if date is "today"
             if date == "today":
-                conditions.append(
-                    func.date(model_class.created_at) == func.current_date()
-                )
+                kst = timezone(timedelta(hours=9)) # UTC+9
+                now_kst = datetime.now(kst)
+
+                today_start = now_kst.replace(hour=0, minute=0, second=0, microsecond=0)
+                today_end = now_kst.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+                conditions.append(model_class.created_at >= today_start)
+                conditions.append(model_class.created_at <= today_end)
 
             query = select(
                 model_class,
