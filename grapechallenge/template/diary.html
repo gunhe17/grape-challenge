@@ -10,7 +10,7 @@
 </head>
 <body class="overflow-hidden h-screen">
   <div class="bg-white h-full flex flex-col">
-    <header class="flex-none bg-white sticky top-0 z-[10001]">
+    <header class="flex-none bg-white sticky top-0 z-20">
       <nav aria-label="Global" class="flex items-center justify-between px-5 py-4 lg:px-7">
         <div class="flex items-center ml-2">
           <a href="/home" class="-m-1 p-1 inline-flex items-center justify-center">
@@ -32,27 +32,37 @@
       <div id="sidebar-container"></div>
     </header>
 
-    <!-- Page Content -->
-    <div class="relative flex-1 overflow-y-auto">
+    <!-- Page Title Section (Sticky) -->
+    <div class="relative isolate flex-none sticky top-[72px] z-[15] bg-white">
       <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
         <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
       </div>
 
-      <div class="mx-auto max-w-7xl px-5 lg:px-7 py-7 sm:py-10">
-        <div class="text-center mb-10">
+      <div class="mx-auto max-w-7xl px-5 lg:px-7 pt-7 sm:pt-10">
+        <div class="text-center">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900">감사일기장</h1>
           <p class="mt-2 text-sm text-gray-600">오늘 우리가 고백한 감사의 제목들</p>
         </div>
+      </div>
+    </div>
 
-        <!-- Content Area -->
+    <!-- Summary Stats (Sticky) -->
+    <div class="flex-none sticky top-[180px] z-10 bg-white py-2">
+      <div class="mx-auto max-w-7xl px-5 lg:px-7">
         <div class="max-w-4xl mx-auto">
-          <!-- Stats -->
-          <div class="mb-5 px-2">
+          <div class="px-2">
             <p id="diary-stats-text" class="text-sm text-gray-600">
               전체 <span class="font-semibold text-gray-900">0</span>개
             </p>
           </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- Scrollable Content Area -->
+    <div class="relative flex-1 overflow-y-auto">
+      <div class="mx-auto max-w-7xl px-5 lg:px-7 pt-8 pb-32">
+        <div class="max-w-4xl mx-auto">
           <!-- Diary List -->
           <div id="diary-list" class="space-y-4">
             <!-- Loading skeleton -->
@@ -74,10 +84,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <div aria-hidden="true" class="absolute inset-x-0 bottom-0 -z-10 transform-gpu overflow-hidden blur-3xl pointer-events-none">
-        <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%+36rem)] sm:w-288.75"></div>
       </div>
     </div>
   </div>

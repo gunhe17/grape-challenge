@@ -10,7 +10,7 @@
 </head>
 <body class="overflow-hidden h-screen">
   <div class="bg-white h-full flex flex-col">
-    <header class="flex-none bg-white sticky top-0 z-[10001]">
+    <header class="flex-none bg-white sticky top-0 z-20">
       <nav aria-label="Global" class="flex items-center justify-between px-5 py-4 lg:px-7">
         <div class="flex items-center ml-2">
           <a href="/home" class="-m-1 p-1 inline-flex items-center justify-center">
@@ -33,12 +33,12 @@
     </header>
 
     <!-- Page Title Section (Sticky) -->
-    <div class="relative isolate flex-none sticky top-[72px] z-[10000] bg-white">
+    <div class="relative isolate flex-none sticky top-[72px] z-[15] bg-white">
       <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
         <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
       </div>
 
-      <div class="mx-auto max-w-7xl px-5 lg:px-7 py-5">
+      <div class="mx-auto max-w-7xl px-5 lg:px-7 pt-5">
         <div class="text-center relative z-[10000]">
           <div class="flex items-center justify-center gap-3">
             <button id="grove-mode-button" type="button" aria-haspopup="menu" aria-expanded="false" class="group flex cursor-pointer justify-center items-center gap-2 rounded-lg min-h-9 px-3 py-1.5 text-2xl font-bold tracking-tight hover:bg-orange-50 focus-visible:bg-orange-50 focus-visible:outline-none transition-colors whitespace-nowrap">
@@ -49,7 +49,7 @@
             </button>
 
             <!-- Dropdown Menu -->
-            <div id="grove-mode-menu" class="hidden absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 min-w-48 max-h-[220px] overflow-y-auto z-[9999]">
+            <div id="grove-mode-menu" class="hidden absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 min-w-48 max-h-[220px] overflow-y-auto z-[100]">
               <button data-mode="my" class="grove-mode-option w-full text-left px-4 py-2.5 hover:bg-orange-50 transition-colors flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-900">나의 과수원</span>
                 <svg class="mode-check hidden w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
@@ -74,11 +74,10 @@
       </div>
     </div>
 
-    <!-- Scrollable Content Area -->
-    <div class="relative flex-1 overflow-y-auto">
-      <div class="mx-auto max-w-7xl px-5 lg:px-7 pt-5 pb-32">
-        <!-- View Toggle and Summary Stats -->
-        <div class="mb-5 px-2 flex items-center justify-between">
+    <!-- View Toggle and Summary Stats (Sticky) -->
+    <div class="flex-none sticky top-[180px] z-10 bg-white py-2">
+      <div class="mx-auto max-w-7xl px-5 lg:px-7">
+        <div class="px-2 flex items-center justify-between">
           <p id="stats-text" class="text-sm text-gray-600">
             전체 <span class="font-semibold text-gray-900">0</span>
           </p>
@@ -95,7 +94,12 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
 
+    <!-- Scrollable Content Area -->
+    <div class="relative flex-1 overflow-y-auto">
+      <div class="mx-auto max-w-7xl px-5 lg:px-7 pt-12 pb-32">
         <!-- Grid View -->
         <div id="grid-view" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 px-2">
           <!-- Loading Skeleton -->
