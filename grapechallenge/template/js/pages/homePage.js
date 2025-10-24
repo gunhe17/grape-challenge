@@ -247,7 +247,7 @@ function showGratitudeModal(btn) {
     charCountEl.textContent = charCount;
 
     // Update submit button state
-    if (content.length >= 5 && content.length <= 40) {
+    if (content.length >= 5 && content.length <= 1000) {
       submitBtn.disabled = false;
       submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     } else {

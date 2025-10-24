@@ -22,8 +22,8 @@ class Content:
         if value == "":
             raise EmptyValueError(target=cls.__name__)
 
-        if len(value) > 40:
-            raise InvalidLengthError(target=cls.__name__, min_len=1, max_len=40)
+        if len(value) > 1000:
+            raise InvalidLengthError(target=cls.__name__, min_len=1, max_len=1000)
 
         return cls(_value=value)
 

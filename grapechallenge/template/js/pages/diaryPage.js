@@ -115,7 +115,7 @@ function createDiaryCard(diary, index) {
 
   card.innerHTML = `
     <div class="space-y-3">
-      <p class="text-base text-gray-800 leading-relaxed whitespace-pre-wrap">${diary.content || '내용이 없습니다.'}</p>
+      <p class="text-base text-gray-800 leading-relaxed whitespace-pre-wrap break-words">${diary.content || '내용이 없습니다.'}</p>
       <div class="flex items-center justify-end">
         <span class="text-sm text-gray-500">${diary.user_name || '익명'}의 감사일기</span>
       </div>
