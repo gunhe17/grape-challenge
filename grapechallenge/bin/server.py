@@ -20,6 +20,7 @@ app.mount("/js", StaticFiles(directory=str(BASE_PATH / "template" / "js")), name
 app.mount("/components", StaticFiles(directory=str(BASE_PATH / "template" / "components")), name="components")
 app.mount("/css", StaticFiles(directory=str(BASE_PATH / "template" / "css")), name="css")
 app.mount("/images", StaticFiles(directory=str(BASE_PATH / "template" / "images")), name="images")
+app.mount("/favicon", StaticFiles(directory=str(BASE_PATH / "template" / "favicon")), name="favicon")
 
 
 # #
