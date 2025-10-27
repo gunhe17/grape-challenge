@@ -23,3 +23,5 @@ from .harvest_fruit import HarvestFruitInput, harvest_fruit
 
 from .login_user import LoginUserInput, login_user
 from .logout_user import LogoutUserInput, logout_user
+
+from .write_daily_mission_report import WriteDailyMissionReportInput, write_daily_mission_report

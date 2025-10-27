@@ -291,13 +291,11 @@ class RepoMission(Repo):
                 app_env = get_app_env()
 
                 if app_env == "dev":
-                    # Development: Use UTC
                     today = datetime.now(timezone.utc).date()
                     conditions.append(
                         cast(model_class.created_at, Date) == today
                     )
                 else:
-                    # Production: Use KST (UTC+9)
                     kst = timezone(timedelta(hours=9))
                     today_kst = datetime.now(kst).date()
                     conditions.append(
@@ -308,6 +306,35 @@ class RepoMission(Repo):
                             ),
                             Date
                         ) == today_kst
+                    )
+            elif date == "report":
+                app_env = get_app_env()
+
+                if app_env == "dev":
+                    now_utc = datetime.now(timezone.utc)
+                    today_22 = datetime.combine(now_utc.date(), datetime.min.time()).replace(hour=22)
+                    yesterday_22 = today_22 - timedelta(days=1)
+                    conditions.append(
+                        and_(
+                            model_class.created_at >= yesterday_22,
+                            model_class.created_at < today_22
+                        )
+                    )
+                else:
+                    kst = timezone(timedelta(hours=9))
+                    now_kst = datetime.now(kst)
+                    today_22_kst = datetime.combine(now_kst.date(), datetime.min.time()).replace(hour=22)
+                    yesterday_22_kst = today_22_kst - timedelta(days=1)
+
+                    # Convert to UTC and remove timezone info for DB comparison
+                    yesterday_22_utc = (yesterday_22_kst - timedelta(hours=9))
+                    today_22_utc = (today_22_kst - timedelta(hours=9))
+
+                    conditions.append(
+                        and_(
+                            model_class.created_at >= yesterday_22_utc,
+                            model_class.created_at < today_22_utc
+                        )
                     )
 
             query = select(

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>감사 일기 리포트</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png">
+  <link rel="manifest" href="./favicon/site.webmanifest">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./css/animations.css">
+</head>
+<body class="h-screen overflow-hidden">
+  <div class="bg-white h-full">
+    <div class="relative isolate h-full overflow-y-auto">
+      <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+        <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
+      </div>
+
+      <div class="mx-auto max-w-4xl px-5 lg:px-7 py-7 sm:py-10">
+        <div class="flex flex-col items-center">
+          <!-- Info Section -->
+          <div class="w-full mb-6 text-center">
+            <p class="text-sm text-gray-600">어제 22시부터 오늘 22시까지 작성된 감사 일기</p>
+          </div>
+
+          <!-- Report Images Container -->
+          <div id="report-container" class="w-full space-y-4">
+            <!-- Loading State -->
+            <div id="loading" class="rounded-xl bg-gray-100 px-7 py-10 text-center animate-pulse">
+              <div class="inline-flex items-center space-x-2">
+                <svg class="animate-spin h-5 w-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-gray-600 font-medium">이미지를 생성하는 중...</span>
+              </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="error" class="hidden rounded-xl bg-red-50 px-7 py-5 text-center">
+              <p class="text-red-600 font-medium" id="error-message"></p>
+            </div>
+
+            <!-- Images will be inserted here -->
+          </div>
+
+          <!-- Action Buttons -->
+          <div id="action-buttons" class="hidden w-full max-w-lg mt-6 flex flex-col sm:flex-row gap-3">
+            <button
+              id="download-all-btn"
+              class="flex-1 rounded-lg bg-orange-500 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-400 transition-colors"
+            >
+              <span class="inline-flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                전체 다운로드
+              </span>
+            </button>
+            <button
+              id="refresh-btn"
+              class="flex-1 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <span class="inline-flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                새로고침
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 여백 -->
+      <div class="h-[20vh]"></div>
+
+      <div aria-hidden="true" class="absolute inset-x-0 bottom-0 -z-10 transform-gpu overflow-hidden blur-3xl pointer-events-none">
+        <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff9966] to-[#ff6b35] opacity-20 sm:left-[calc(50%+36rem)] sm:w-288.75"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    let imageBlobs = [];
+
+    async function loadReport() {
+      const loadingEl = document.getElementById('loading');
+      const errorEl = document.getElementById('error');
+      const errorMessageEl = document.getElementById('error-message');
+      const reportContainer = document.getElementById('report-container');
+      const actionButtons = document.getElementById('action-buttons');
+
+      try {
+        loadingEl.classList.remove('hidden');
+        errorEl.classList.add('hidden');
+        actionButtons.classList.add('hidden');
+
+        // Remove previous images
+        const oldImages = reportContainer.querySelectorAll('.report-image-card');
+        oldImages.forEach(img => img.remove());
+
+        const response = await fetch('/mission/report/daily');
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || '리포트를 생성할 수 없습니다');
+        }
+
+        const data = await response.json();
+        const imageBytesListBase64 = data.image_bytes_list || [];
+        const pageCount = data.page_count || 0;
+
+        if (!imageBytesListBase64.length) {
+          throw new Error('생성된 이미지가 없습니다');
+        }
+
+        imageBlobs = [];
+
+        // Display all pages
+        for (let i = 0; i < imageBytesListBase64.length; i++) {
+          const base64Data = imageBytesListBase64[i];
+          const blob = base64ToBlob(base64Data, 'image/jpeg');
+          const imageUrl = URL.createObjectURL(blob);
+          imageBlobs.push({ url: imageUrl, blob: blob });
+
+          const imageCard = document.createElement('div');
+          imageCard.className = 'report-image-card rounded-xl overflow-hidden shadow-lg bg-white animate-fade-in';
+
+          if (pageCount > 1) {
+            const pageLabel = document.createElement('div');
+            pageLabel.className = 'px-4 py-2 bg-gray-50 border-b border-gray-200';
+            pageLabel.innerHTML = `<span class="text-sm font-medium text-gray-700">페이지 ${i + 1} / ${pageCount}</span>`;
+            imageCard.appendChild(pageLabel);
+          }
+
+          const img = document.createElement('img');
+          img.src = imageUrl;
+          img.alt = `감사 일기 리포트 ${i + 1}`;
+          img.className = 'w-full h-auto';
+          imageCard.appendChild(img);
+
+          // Individual download button
+          const downloadDiv = document.createElement('div');
+          downloadDiv.className = 'px-4 py-3 bg-gray-50 border-t border-gray-200';
+          const downloadBtn = document.createElement('button');
+          downloadBtn.className = 'w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors';
+          downloadBtn.innerHTML = `<span class="inline-flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            다운로드
+          </span>`;
+          downloadBtn.onclick = () => downloadImage(imageUrl, i + 1);
+          downloadDiv.appendChild(downloadBtn);
+          imageCard.appendChild(downloadDiv);
+
+          reportContainer.appendChild(imageCard);
+        }
+
+        loadingEl.classList.add('hidden');
+        actionButtons.classList.remove('hidden');
+
+      } catch (error) {
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+        errorMessageEl.textContent = error.message;
+      }
+    }
+
+    function base64ToBlob(base64, mimeType) {
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      return new Blob([byteArray], { type: mimeType });
+    }
+
+    function downloadImage(url, pageNum) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `감사일기_리포트_${new Date().toISOString().split('T')[0]}_page${pageNum}.jpg`;
+      a.click();
+    }
+
+    function downloadAllImages() {
+      imageBlobs.forEach((item, index) => {
+        setTimeout(() => {
+          downloadImage(item.url, index + 1);
+        }, index * 300);
+      });
+    }
+
+    // Event Listeners
+    document.getElementById('download-all-btn')?.addEventListener('click', downloadAllImages);
+    document.getElementById('refresh-btn')?.addEventListener('click', loadReport);
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      loadReport();
+    });
+  </script>
+</body>
+</html>

@@ -98,3 +98,12 @@ async def diary_page(request: Request) -> HTMLResponse:
 
 async def login_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("login.html", {"request": request})
+
+
+@require_auth()
+async def report_page(request: Request) -> HTMLResponse:
+    user = get_current_user(request)
+    return templates.TemplateResponse("report.html", {
+        "request": request,
+        "user": user
+    })

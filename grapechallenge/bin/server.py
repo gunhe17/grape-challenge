@@ -95,6 +95,10 @@ Router(
     "/mission/test", ["POST"], mission.post_test_mission
 ).register(app)
 
+Router(
+    "/mission/report/daily", ["GET"], mission.get_daily_mission_report
+).register(app)
+
 # Bible
 Router(
     "/bible/verse", ["POST"], bible.post_bible_verse
@@ -127,6 +131,10 @@ Router(
 
 Router(
     "/login", ["GET"], template.login_page
+).register(app)
+
+Router(
+    "/report", ["GET"], template.report_page
 ).register(app)
 
 

@@ -8,3 +8,4 @@ asyncpg
 greenlet
 pydantic
 httpx
+pillow

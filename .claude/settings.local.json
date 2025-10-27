@@ -18,7 +18,11 @@
       "Bash(psql grape_dev -c \"SELECT id, name, status, seventh_status FROM fruits WHERE fruit_template_id = ''1a00a17e-2f9f-41f4-8dad-25dee29e1b18'' LIMIT 5;\")",
       "Bash(psql grape_dev -c \"\\d fruits\")",
       "Bash(curl -s http://localhost:8000/health)",
-      "Bash(psql grape_dev -c \"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ''fruits'' ORDER BY ordinal_position;\")"
+      "Bash(psql grape_dev -c \"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ''fruits'' ORDER BY ordinal_position;\")",
+      "Bash(python -m pip list:*)",
+      "Bash(python3 -m pip:*)",
+      "Bash(python3:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []
