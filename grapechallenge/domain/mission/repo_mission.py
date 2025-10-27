@@ -239,6 +239,10 @@ class RepoMission(Repo):
         elif app_env == "prod":
             kst = timezone(timedelta(hours=9))
             today_kst = datetime.now(kst).date()
+            print(f"[is_template_completed_today] app_env: {app_env}")
+            print(f"[is_template_completed_today] user_id: {user_id}")
+            print(f"[is_template_completed_today] template_id: {template_id}")
+            print(f"[is_template_completed_today] today_kst: {today_kst}")
             query = select(func.count(MissionModel.id)).where(
                 and_(
                     MissionModel.user_id == user_id,
@@ -258,6 +262,8 @@ class RepoMission(Repo):
 
         result = await session.execute(query)
         count = result.scalar()
+        print(f"[is_template_completed_today] count: {count}")
+        print(f"[is_template_completed_today] is_completed: {(count or 0) > 0}")
 
         return (count or 0) > 0
     
