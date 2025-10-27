@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 # local
 from grapechallenge.bin.common.router import Router
-from grapechallenge.endpoint import user, fruit, fruit_template, mission, template
+from grapechallenge.endpoint import user, fruit, fruit_template, mission, template, bible
 
 # Load environment variables
 load_dotenv()
@@ -95,6 +95,19 @@ Router(
     "/mission/test", ["POST"], mission.post_test_mission
 ).register(app)
 
+# Bible
+Router(
+    "/bible/verse", ["POST"], bible.post_bible_verse
+).register(app)
+
+Router(
+    "/bible/verses", ["POST"], bible.post_bible_verses
+).register(app)
+
+Router(
+    "/bible/today", ["GET"], bible.get_today_verse
+).register(app)
+
 # Template
 Router(
     "/", ["GET"], template.home_page
@@ -121,6 +134,9 @@ Router(
 # main
 
 if __name__ == "__main__":
+    from grapechallenge.config import get_app_env
+    print("APP_ENV: ", get_app_env())
+
     uvicorn.run(
         **{
             "app": "server:app",

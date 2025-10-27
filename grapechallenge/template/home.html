@@ -55,7 +55,7 @@
             </svg>
 
             <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-26 h-26 sm:w-34 sm:h-34 rounded-full flex items-center justify-center">
+              <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center">
                 <span id="stage-emoji" class="text-5xl sm:text-6xl emoji-animate"></span>
               </div>
             </div>
@@ -116,6 +116,54 @@
     </div>
   </div>
 
+  <!-- Bible Reading Modal -->
+  <div id="bible-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+      <!-- Modal Content -->
+      <div class="relative transform overflow-hidden rounded-2xl bg-white px-6 py-6 shadow-xl transition-all w-full max-w-2xl sm:my-8">
+        <div class="mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">오늘의 말씀</h3>
+          <p class="mt-1 text-sm text-gray-600">오늘의 성경 말씀을 읽어보세요</p>
+        </div>
+
+        <!-- Scrollable content area with checkbox at bottom -->
+        <div id="bible-content-container" class="max-h-40 overflow-y-auto rounded-lg bg-orange-50">
+          <div id="bible-verse-content" class="p-4 pb-16">
+            <!-- Bible verse content will be loaded here -->
+          </div>
+
+          <!-- Read confirmation checkbox at the very bottom (requires scroll to see) -->
+          <div class="px-4 pb-4">
+            <div class="flex items-center justify-center">
+              <input
+                id="bible-read-checkbox"
+                type="checkbox"
+                class="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+              >
+              <label for="bible-read-checkbox" class="ml-2 text-sm font-semibold text-gray-700">
+                말씀을 끝까지 읽었습니다
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3 justify-end">
+          <button
+            id="bible-close-btn"
+            type="button"
+            disabled
+            class="rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            완료
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Gratitude Diary Modal -->
   <div id="gratitude-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
     <div class="flex min-h-full items-center justify-center p-4">
@@ -125,8 +173,8 @@
       <!-- Modal Content -->
       <div class="relative transform overflow-hidden rounded-2xl bg-white px-6 py-6 shadow-xl transition-all w-full max-w-2xl sm:my-8">
         <div class="mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">감사 일기 쓰기</h3>
-          <p class="mt-1 text-sm text-gray-600">오늘 하루 감사했던 일을 작성해주세요 (1,000자 이내)</p>
+          <h3 class="text-lg font-semibold text-gray-900">감사 일기 작성하기</h3>
+          <p class="mt-1 text-xs text-gray-600">추수감사절을 준비하며, 한 해 동안 하나님께서 베푸신 은혜를 기록해보세요.</p>
         </div>
 
         <div class="relative">

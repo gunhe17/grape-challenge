@@ -204,6 +204,12 @@ async function handleCompleteMission(event) {
     return;
   }
 
+  // show modal for bible reading
+  if (missionName === MISSION_NAMES.BIBLE_READING) {
+    showBibleModal(btn);
+    return;
+  }
+
   // complete mission without content
   btn.disabled = true;
 
@@ -302,6 +308,88 @@ function showGratitudeModal(btn) {
   contentTextarea.addEventListener('input', handleInput);
   submitBtn.addEventListener('click', handleSubmit);
   cancelBtn.addEventListener('click', handleCancel);
+}
+
+async function showBibleModal(btn) {
+  const modal = document.getElementById('bible-modal');
+  const contentContainer = document.getElementById('bible-content-container');
+  const checkbox = document.getElementById('bible-read-checkbox');
+  const closeBtn = document.getElementById('bible-close-btn');
+
+  // Reset state
+  checkbox.checked = false;
+  closeBtn.disabled = true;
+
+  // Fetch today's bible verse
+  try {
+    const response = await fetch('/bible/today', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert('오늘의 말씀을 불러올 수 없습니다.');
+      return;
+    }
+
+    // Display bible verse in modal
+    const verseContent = document.getElementById('bible-verse-content');
+    verseContent.innerHTML = `
+      <div class="mb-4">
+        <p class="text-sm font-semibold text-orange-600 mb-4">${data.reference}</p>
+        <p class="text-base text-gray-800 leading-relaxed whitespace-pre-wrap">${data.content}</p>
+      </div>
+    `;
+
+    // Show modal
+    modal.classList.remove('hidden');
+
+    // Handle checkbox change
+    const handleCheckboxChange = () => {
+      closeBtn.disabled = !checkbox.checked;
+    };
+
+    // Handle close
+    const handleClose = async () => {
+      if (!checkbox.checked) return;
+
+      modal.classList.add('hidden');
+
+      // Complete mission
+      btn.disabled = true;
+
+      const result = await FruitAPI.completeMission(currentFruit.fruit_id, MISSION_NAMES.BIBLE_READING, null);
+
+      if (result) {
+        await fetchAndUpdateFruit();
+        updateUI();
+      } else {
+        alert('미션 완료 중 오류가 발생했습니다.');
+        btn.textContent = '완료';
+        btn.disabled = false;
+      }
+
+      cleanup();
+    };
+
+    // Cleanup listeners
+    const cleanup = () => {
+      checkbox.removeEventListener('change', handleCheckboxChange);
+      closeBtn.removeEventListener('click', handleClose);
+    };
+
+    // Add listeners
+    checkbox.addEventListener('change', handleCheckboxChange);
+    closeBtn.addEventListener('click', handleClose);
+
+  } catch (error) {
+    console.error('Bible verse fetch error:', error);
+    alert('오늘의 말씀을 불러오는 중 오류가 발생했습니다.');
+  }
 }
 
 async function handleHarvest(event) {

@@ -3,6 +3,9 @@ from .complete_test_mission import CompleteTestMissionInput, complete_test_missi
 
 from .count_my_completed_fruits import CountMyCompletedFruitsInput, count_my_completed_fruits
 
+from .create_bible_verse import CreateBibleVerseInput, create_bible_verse
+from .create_bible_verses import CreateBibleVersesInput, create_bible_verses
+
 from .create_fruit import CreateFruitInput, create_fruit
 
 from .create_user import CreateUserInput, create_user
@@ -14,6 +17,7 @@ from .get_fruits_by_cell_with_template import GetFruitsByCellWithTemplateInput, 
 from .get_missions_by_name import GetMissionsByNameInput, get_missions_by_name
 from .get_my_fruits import GetMyFruitsInput, get_my_fruits
 from .get_my_in_progress_fruit import GetMyInProgressFruitInput, get_my_in_progress_fruit
+from .get_today_bible_verse import GetTodayBibleVerseInput, get_today_bible_verse
 
 from .harvest_fruit import HarvestFruitInput, harvest_fruit
 

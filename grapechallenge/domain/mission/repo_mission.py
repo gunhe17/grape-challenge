@@ -228,7 +228,6 @@ class RepoMission(Repo):
         app_env = get_app_env()
 
         if app_env == "dev":
-            # Development: Use UTC
             today = datetime.now(timezone.utc).date()
             query = select(func.count(MissionModel.id)).where(
                 and_(
@@ -237,8 +236,7 @@ class RepoMission(Repo):
                     cast(MissionModel.created_at, Date) == today
                 )
             )
-        else:
-            # Production: Use KST (UTC+9)
+        elif app_env == "prod":
             kst = timezone(timedelta(hours=9))
             today_kst = datetime.now(kst).date()
             query = select(func.count(MissionModel.id)).where(
@@ -254,6 +252,8 @@ class RepoMission(Repo):
                     ) == today_kst
                 )
             )
+        else:
+            return False
 
         result = await session.execute(query)
         count = result.scalar()

@@ -43,7 +43,7 @@ export const UI_CONSTANTS = {
  * 미션 이름 상수
  */
 export const MISSION_NAMES = {
-  GRATITUDE_DIARY: '감사 일기 쓰기',
+  GRATITUDE_DIARY: '감사 일기 작성하기',
   BIBLE_READING: '말씀 읽기',
 };
 

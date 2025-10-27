@@ -56,7 +56,7 @@ export async function initDiaryPage() {
  * Fetch diaries from API
  */
 async function fetchDiaries() {
-  const result = await MissionAPI.fetchMissionsByName('감사 일기 쓰기', 'today');
+  const result = await MissionAPI.fetchMissionsByName('감사 일기 작성하기', 'today');
   state.diaries = result.missions;
   state.count = result.count;
 }
