@@ -253,6 +253,7 @@ class RepoMission(Repo):
                 )
             )
         else:
+            print("is_template_completed_today is not found.")
             return False
 
         result = await session.execute(query)
