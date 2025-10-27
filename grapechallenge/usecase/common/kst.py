@@ -9,9 +9,9 @@ def kst(dt: Optional[datetime]) -> Optional[str]:
     from grapechallenge.config import get_app_env
     app_env = get_app_env()
 
-    if app_env is "dev":
+    if app_env == "dev":
         return dt.isoformat()
     
-    if app_env is "prod":
+    if app_env == "prod":
         kst = timezone(timedelta(hours=9))
         return dt.replace(tzinfo=timezone.utc).astimezone(kst).isoformat()
