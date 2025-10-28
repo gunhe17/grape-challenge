@@ -1,0 +1,9 @@
+name: grape-challenge-db
+app: postgresql@16
+options:
+  rootusername: user
+  rootpassword: password
+  database: grape-challenge
+  tz: UTC+9
+context:
+  preset: postgresql

@@ -1,0 +1,28 @@
+name: grape-challenge
+app: python@3.12
+options:
+  ports: "8000"
+  start: python3 grapechallenge/bin/server.py
+  healthz: /health
+  install: pip install -r requirements.txt
+  strategy: recreate
+  env:
+    - name: POSTGRES_USER
+      value: user
+    - name: POSTGRES_PASSWORD
+      value: password
+    - name: POSTGRES_HOST
+      value: grape-challenge-db
+    - name: POSTGRES_PORT
+      value: "5432"
+    - name: POSTGRES_DB
+      value: grape-challenge
+  buildenv:
+    - name: PYTHONPATH
+      value: .
+    - name: APP_ENV
+      value: prod
+context:
+  git:
+    url: https://github.com/gunhe17/grape-challenge.git
+    branch: main
