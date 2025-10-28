@@ -39,7 +39,7 @@ async def get_missions(request: Request, input: GetMissionsByNameInput = Depends
     return JSONResponse(content=res.content, status_code=res.code)
 
 
-async def get_daily_mission_report(request: Request) -> JSONResponse:
+async def get_daily_mission_report(request: Request, input: WriteDailyMissionReportInput = Depends()) -> JSONResponse:
     """Generate and return daily mission report as JSON with base64 images"""
     import base64
 
@@ -47,7 +47,7 @@ async def get_daily_mission_report(request: Request) -> JSONResponse:
         res = await write_daily_mission_report(
             session=session,
             request=request,
-            input=WriteDailyMissionReportInput()
+            input=input
         )
 
         if res.code != 200:

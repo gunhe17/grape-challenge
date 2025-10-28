@@ -25,6 +25,29 @@
             <p class="text-sm text-gray-600">어제 22시부터 오늘 22시까지 작성된 감사 일기</p>
           </div>
 
+          <!-- Background Selection -->
+          <div class="w-full mb-6">
+            <div class="rounded-xl bg-white shadow-sm border border-gray-200 px-5 py-4">
+              <label class="block text-sm font-medium text-gray-700 mb-3">배경 이미지 선택</label>
+              <div class="flex gap-3">
+                <button
+                  class="background-option flex-1 rounded-lg border-2 border-gray-200 p-3 hover:border-orange-500 transition-all"
+                  data-background="background1.jpg"
+                >
+                  <div class="aspect-video rounded bg-gradient-to-br from-orange-100 to-orange-200 mb-2"></div>
+                  <p class="text-xs font-medium text-gray-700 text-center">배경 1</p>
+                </button>
+                <button
+                  class="background-option flex-1 rounded-lg border-2 border-orange-500 p-3 hover:border-orange-500 transition-all bg-orange-50"
+                  data-background="background2.jpg"
+                >
+                  <div class="aspect-video rounded bg-gradient-to-br from-amber-100 to-amber-200 mb-2"></div>
+                  <p class="text-xs font-medium text-gray-700 text-center">배경 2</p>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Report Images Container -->
           <div id="report-container" class="w-full space-y-4">
             <!-- Loading State -->
@@ -85,6 +108,7 @@
 
   <script type="module">
     let imageBlobs = [];
+    let selectedBackground = 'background2.jpg';
 
     async function loadReport() {
       const loadingEl = document.getElementById('loading');
@@ -102,7 +126,7 @@
         const oldImages = reportContainer.querySelectorAll('.report-image-card');
         oldImages.forEach(img => img.remove());
 
-        const response = await fetch('/mission/report/daily');
+        const response = await fetch(`/mission/report/daily?background_image=${encodeURIComponent(selectedBackground)}`);
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -195,9 +219,32 @@
       });
     }
 
+    // Background selection
+    function selectBackground(background) {
+      selectedBackground = background;
+
+      // Update UI
+      document.querySelectorAll('.background-option').forEach(btn => {
+        if (btn.dataset.background === background) {
+          btn.classList.add('border-orange-500', 'bg-orange-50');
+          btn.classList.remove('border-gray-200');
+        } else {
+          btn.classList.remove('border-orange-500', 'bg-orange-50');
+          btn.classList.add('border-gray-200');
+        }
+      });
+
+      // Reload report with new background
+      loadReport();
+    }
+
     // Event Listeners
     document.getElementById('download-all-btn')?.addEventListener('click', downloadAllImages);
     document.getElementById('refresh-btn')?.addEventListener('click', loadReport);
+
+    document.querySelectorAll('.background-option').forEach(btn => {
+      btn.addEventListener('click', () => selectBackground(btn.dataset.background));
+    });
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
