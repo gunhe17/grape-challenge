@@ -14,6 +14,7 @@ import { AuthAPI } from '../api/authApi.js';
 // ========================
 let currentFruit = null;
 let currentMissions = [];
+let scrollPosition = 0;
 
 // ========================
 // 초기화
@@ -225,6 +226,25 @@ async function handleCompleteMission(event) {
   }
 }
 
+// ========================
+// 모달 유틸리티
+// ========================
+function lockBodyScroll() {
+  scrollPosition = window.pageYOffset;
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollPosition}px`;
+  document.body.style.width = '100%';
+}
+
+function unlockBodyScroll() {
+  document.body.style.removeProperty('overflow');
+  document.body.style.removeProperty('position');
+  document.body.style.removeProperty('top');
+  document.body.style.removeProperty('width');
+  window.scrollTo(0, scrollPosition);
+}
+
 function showGratitudeModal(btn) {
   const modal = document.getElementById('gratitude-modal');
   const contentTextarea = document.getElementById('gratitude-content');
@@ -237,6 +257,9 @@ function showGratitudeModal(btn) {
   charCountEl.textContent = '0';
   submitBtn.disabled = true;
   submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+  // lock body scroll
+  lockBodyScroll();
 
   // show modal
   modal.classList.remove('hidden');
@@ -265,6 +288,7 @@ function showGratitudeModal(btn) {
   // handle cancel
   const handleCancel = () => {
     modal.classList.add('hidden');
+    unlockBodyScroll();
     cleanup();
   };
 
@@ -279,6 +303,7 @@ function showGratitudeModal(btn) {
 
     // hide modal
     modal.classList.add('hidden');
+    unlockBodyScroll();
 
     // complete mission with content
     btn.disabled = true;
@@ -312,7 +337,6 @@ function showGratitudeModal(btn) {
 
 async function showBibleModal(btn) {
   const modal = document.getElementById('bible-modal');
-  const contentContainer = document.getElementById('bible-content-container');
   const checkbox = document.getElementById('bible-read-checkbox');
   const closeBtn = document.getElementById('bible-close-btn');
 
@@ -345,6 +369,9 @@ async function showBibleModal(btn) {
       </div>
     `;
 
+    // lock body scroll
+    lockBodyScroll();
+
     // Show modal
     modal.classList.remove('hidden');
 
@@ -358,6 +385,7 @@ async function showBibleModal(btn) {
       if (!checkbox.checked) return;
 
       modal.classList.add('hidden');
+      unlockBodyScroll();
 
       // Complete mission
       btn.disabled = true;
