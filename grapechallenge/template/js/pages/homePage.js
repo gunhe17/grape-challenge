@@ -355,19 +355,27 @@ async function showBibleModal(btn) {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      alert('오늘의 말씀을 불러올 수 없습니다.');
-      return;
-    }
-
     // Display bible verse in modal
     const verseContent = document.getElementById('bible-verse-content');
-    verseContent.innerHTML = `
-      <div class="mb-4">
-        <p class="text-sm font-semibold text-orange-600 mb-4">${data.reference}</p>
-        <p class="text-base text-gray-800 leading-relaxed whitespace-pre-wrap">${data.content}</p>
-      </div>
-    `;
+
+    if (!response.ok) {
+      // Show fallback message
+      verseContent.innerHTML = `
+        <div class="mb-4">
+          <p class="text-base text-gray-800 leading-relaxed text-center">
+            ${data.message || '오늘의 말씀이 준비되지 않았습니다. 자유롭게 성경을 읽어보세요!'}
+          </p>
+        </div>
+      `;
+    } else {
+      // Show bible verse
+      verseContent.innerHTML = `
+        <div class="mb-4">
+          <p class="text-sm font-semibold text-orange-600 mb-4">${data.reference}</p>
+          <p class="text-base text-gray-800 leading-relaxed whitespace-pre-wrap">${data.content}</p>
+        </div>
+      `;
+    }
 
     // lock body scroll
     lockBodyScroll();

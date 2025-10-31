@@ -148,11 +148,10 @@ export const MissionCard = {
       <div class="flex items-center justify-between gap-x-5">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-x-2">
-            <p class="text-base font-semibold tracking-tight text-gray-900">🧪 테스트 미션 (말씀 읽기)</p>
+            <p class="text-base font-semibold tracking-tight text-gray-900">테스트용 미션</p>
             <span class="inline-flex items-center rounded-md bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700">TEST</span>
           </div>
-          <p class="mt-1 text-sm text-gray-600">테스트용 미션 - 제한 없이 반복 가능</p>
-          <p class="mt-1 text-xs text-purple-600">⚠️ 개발/테스트 전용 미션입니다</p>
+          <p class="mt-1 text-sm text-gray-600">제한 없이 반복이 가능합니다.</p>
         </div>
         <div class="flex-none">
           <button class="test-mission-btn rounded-lg bg-purple-500 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-purple-400">
