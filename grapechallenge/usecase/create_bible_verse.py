@@ -66,7 +66,6 @@ async def main():
     from datetime import datetime
     args = get_arguments()
 
-    # Parse date string to date object (strip whitespace)
     verse_date = datetime.strptime(args.date.strip(), "%Y-%m-%d").date()
 
     async with transactional_session_helper() as session:

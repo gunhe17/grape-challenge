@@ -84,7 +84,6 @@ async def main():
     with open(args.file, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    # Convert date strings to date objects
     for verse in data['verses']:
         verse['date'] = datetime.strptime(verse['date'], "%Y-%m-%d").date()
 
