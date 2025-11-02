@@ -293,7 +293,8 @@ function renderCellOptions() {
     return;
   }
 
-  const otherCells = state.allCells.filter(cell => cell !== userCell);
+  // Filter out user's cell and admin cell
+  const otherCells = state.allCells.filter(cell => cell !== userCell && cell !== '관리자');
 
   if (!otherCells.length) {
     elements.otherCellsContainer.innerHTML =
