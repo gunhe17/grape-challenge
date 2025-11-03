@@ -40,30 +40,8 @@ async def get_missions(request: Request, input: GetMissionsByNameInput = Depends
 
 
 async def get_daily_mission_report(request: Request, input: WriteDailyMissionReportInput = Depends()) -> JSONResponse:
-    """Generate and return daily mission report as JSON with base64 images"""
-    import base64
-
     async with transactional_session_helper() as session:
-        res = await write_daily_mission_report(
-            session=session,
-            request=request,
-            input=input
-        )
+        res = await write_daily_mission_report(session=session, request=request, input=input)
 
-        if res.code != 200:
-            return JSONResponse(content=res.content, status_code=res.code)
-
-        # Convert image bytes to base64 for JSON response
-        image_bytes_list = res.content.get("image_bytes_list", [])
-        if not image_bytes_list:
-            return JSONResponse(content={"message": "No image generated"}, status_code=500)
-
-        image_bytes_base64 = [base64.b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
-
-        return JSONResponse(content={
-            "image_bytes_list": image_bytes_base64,
-            "page_count": res.content.get("page_count", 0),
-            "count": res.content.get("count", 0),
-            "message": res.content.get("message", "")
-        }, status_code=200)
+    return JSONResponse(content=res.content, status_code=res.code)
 

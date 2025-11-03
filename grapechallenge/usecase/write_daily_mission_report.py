@@ -16,15 +16,13 @@ async def write_daily_mission_report(
     request: Request,
     input: WriteDailyMissionReportInput
 ) -> UsecaseOutput:
-    """Generate daily mission report as multiple page images"""
-
+    
     # get missions
     founds = await RepoMission.get_by_template_name(
         session=session,
         name="감사 일기 작성하기",
         date="report"
     )
-
     if not founds:
         return UsecaseOutput(
             content={"message": "No missions found for the report period"},
@@ -40,10 +38,17 @@ async def write_daily_mission_report(
             code=result.get("code", 500)
         )
 
+    # encode images
+    import base64
+    image_bytes_list = result["image_bytes_list"]
+    image_bytes_base64 = [base64.b64encode(img_bytes).decode('utf-8') for img_bytes in image_bytes_list]
+
     return UsecaseOutput(
         content={
-            "image_bytes_list": result["image_bytes_list"],
-            "page_count": result["page_count"]
+            "image_bytes_list": image_bytes_base64,
+            "page_count": result["page_count"],
+            "count": len(founds),
+            "message": f"Generated {result['page_count']} page(s) from {len(founds)} missions"
         },
         code=200
     )
