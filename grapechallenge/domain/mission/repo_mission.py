@@ -356,6 +356,8 @@ class RepoMission(Repo):
                 model_class.user_id == UserModel.id
             ).where(
                 and_(*conditions)
+            ).order_by(
+                model_class.created_at.desc()
             )
             result = await session.execute(query)
             return result.all()
