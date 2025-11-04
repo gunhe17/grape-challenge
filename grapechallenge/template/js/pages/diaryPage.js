@@ -22,7 +22,8 @@ const elements = {
   diaryList: null,
   statsText: null,
   skeleton: null,
-  emptyState: null
+  emptyState: null,
+  helpIconBtn: null
 };
 
 // ========================
@@ -37,6 +38,7 @@ function cacheElements() {
   elements.statsText = document.getElementById('diary-stats-text');
   elements.skeleton = document.querySelector('.diary-skeleton');
   elements.emptyState = document.getElementById('diary-empty');
+  elements.helpIconBtn = document.getElementById('help-icon-btn');
 }
 
 /**
@@ -46,6 +48,7 @@ export async function initDiaryPage() {
   cacheElements();
   await fetchDiaries();
   renderDiaries();
+  initHelpIconDropdown();
 }
 
 // ========================
@@ -126,11 +129,16 @@ function createDiaryCard(diary, index) {
         <div class="flex items-center gap-1.5">
           <!-- Top Interactions Display -->
           <div class="flex -space-x-1.5 overflow-hidden">
-            ${topInteractions.map(({ emoji }) => `
-              <div class="inline-flex items-center justify-center w-6 h-6 rounded-full ring-2 ring-white bg-gradient-to-br from-orange-100 to-orange-50 text-sm">
-                ${emoji}
-              </div>
-            `).join('')}
+            ${topInteractions.map(({ emoji }, index) => {
+              const bgClass = index === 0
+                ? 'bg-gradient-to-br from-yellow-300 to-yellow-200'
+                : 'bg-gradient-to-br from-gray-300 to-gray-200';
+              return `
+                <div class="inline-flex items-center justify-center w-6 h-6 rounded-full ring-2 ring-white ${bgClass} text-sm">
+                  ${emoji}
+                </div>
+              `;
+            }).join('')}
           </div>
           <!-- Add Interaction Button -->
           <button
@@ -168,13 +176,18 @@ function createDiaryCard(diary, index) {
     dropdown.className = 'fixed bg-white rounded-lg shadow-lg border border-gray-200 p-2';
     dropdown.style.zIndex = '9999';
 
+    // Get user's current interaction emoji if exists
+    const userEmoji = diary.interaction && diary.interaction.length > 0
+      ? diary.interaction[0].icon
+      : null;
+
     dropdown.innerHTML = `
       <div class="flex items-center gap-1">
-        ${createInteractionButton('😆', diary.id)}
-        ${createInteractionButton('😮', diary.id)}
-        ${createInteractionButton('💪', diary.id)}
-        ${createInteractionButton('🙏', diary.id)}
-        ${createInteractionButton('👏', diary.id)}
+        ${createInteractionButton('😆', diary.id, userEmoji)}
+        ${createInteractionButton('😮', diary.id, userEmoji)}
+        ${createInteractionButton('💪', diary.id, userEmoji)}
+        ${createInteractionButton('🙏', diary.id, userEmoji)}
+        ${createInteractionButton('👏', diary.id, userEmoji)}
       </div>
     `;
 
@@ -234,12 +247,18 @@ function createDiaryCard(diary, index) {
  * Create interaction button HTML
  * @param {string} emoji - 이모지
  * @param {string} missionId - 미션 ID
+ * @param {string|null} userEmoji - 사용자가 선택한 이모지 (활성화 표시용)
  * @returns {string} 버튼 HTML
  */
-function createInteractionButton(emoji, missionId) {
+function createInteractionButton(emoji, missionId, userEmoji = null) {
+  const isActive = userEmoji === emoji;
+  const activeClass = isActive
+    ? 'bg-orange-100 hover:bg-orange-200'
+    : 'hover:bg-gray-50';
+
   return `
     <button
-      class="interaction-btn inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-50 transition-colors"
+      class="interaction-btn inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${activeClass}"
       data-emoji="${emoji}"
       data-mission-id="${missionId}"
     >
@@ -250,7 +269,7 @@ function createInteractionButton(emoji, missionId) {
 
 /**
  * Count interactions by emoji
- * @param {Array<string>} interactions - 인터랙션 배열
+ * @param {Array<{icon: string, user_id: string}>} interactions - 인터랙션 배열
  * @returns {Object} 이모지별 카운트
  */
 function countInteractions(interactions) {
@@ -262,7 +281,12 @@ function countInteractions(interactions) {
     '👏': 0
   };
 
-  interactions.forEach(emoji => {
+  if (!interactions || !Array.isArray(interactions)) {
+    return counts;
+  }
+
+  interactions.forEach(item => {
+    const emoji = item.icon;
     if (counts.hasOwnProperty(emoji)) {
       counts[emoji]++;
     }
@@ -317,4 +341,70 @@ function updateStats() {
   if (elements.statsText) {
     elements.statsText.innerHTML = `전체 <span class="font-semibold text-gray-900">${state.count}</span>개`;
   }
+}
+
+// ========================
+// Help Icon Dropdown
+// ========================
+
+/**
+ * Initialize help icon dropdown
+ */
+function initHelpIconDropdown() {
+  if (!elements.helpIconBtn) return;
+
+  let helpDropdown = null;
+
+  elements.helpIconBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    // Remove existing dropdown if any
+    if (helpDropdown) {
+      helpDropdown.remove();
+      helpDropdown = null;
+      return;
+    }
+
+    // Create dropdown
+    helpDropdown = document.createElement('div');
+    helpDropdown.className = 'fixed bg-white rounded-lg shadow-lg border border-gray-200 p-3 max-w-xs';
+    helpDropdown.style.zIndex = '9999';
+
+    helpDropdown.innerHTML = `
+      <p class="text-sm text-gray-700">
+        각 감사 일기마다 가장 많은 공감을 받은<br>이모티콘 두 개가 보여집니다.
+      </p>
+    `;
+
+    // Position dropdown below the button (right-aligned)
+    const rect = elements.helpIconBtn.getBoundingClientRect();
+    helpDropdown.style.right = `${window.innerWidth - rect.right}px`;
+    helpDropdown.style.top = `${rect.bottom + 4}px`;
+
+    document.body.appendChild(helpDropdown);
+
+    // Close dropdown when clicking outside
+    setTimeout(() => {
+      const closeDropdown = (e) => {
+        if (helpDropdown && !helpDropdown.contains(e.target) && e.target !== elements.helpIconBtn) {
+          helpDropdown.remove();
+          helpDropdown = null;
+          document.removeEventListener('click', closeDropdown);
+          window.removeEventListener('scroll', closeOnScroll, true);
+        }
+      };
+
+      const closeOnScroll = () => {
+        if (helpDropdown) {
+          helpDropdown.remove();
+          helpDropdown = null;
+          document.removeEventListener('click', closeDropdown);
+          window.removeEventListener('scroll', closeOnScroll, true);
+        }
+      };
+
+      document.addEventListener('click', closeDropdown);
+      window.addEventListener('scroll', closeOnScroll, true);
+    }, 0);
+  });
 }

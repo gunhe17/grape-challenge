@@ -36,9 +36,9 @@ async def interaction_mission(session: AsyncSession, request: Request, input: In
 
     # add interaction
     new_interaction = (
-        found_mission.mission.interaction.add(input.emoji)
+        found_mission.mission.interaction.add(input.emoji, user_id)
         if found_mission.mission.interaction
-        else Interaction.from_list([input.emoji])
+        else Interaction.from_list([{"icon": input.emoji, "user_id": user_id}])
     )
 
     # update mission

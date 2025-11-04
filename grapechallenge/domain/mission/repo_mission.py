@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import Column, String, DateTime, ForeignKey, and_, func, ARRAY
+from sqlalchemy import Column, String, DateTime, ForeignKey, and_, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from uuid import uuid4
@@ -18,7 +19,7 @@ class MissionModel(Base):
     template_id = Column(String(36), ForeignKey("mission_templates.id", ondelete="CASCADE"), nullable=False)
     fruit_id = Column(String(36), ForeignKey("fruits.id", ondelete="CASCADE"), nullable=False)
     content = Column(String(1000), nullable=True)
-    interaction = Column(ARRAY(String(1)), nullable=True)
+    interaction = Column(JSONB, nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=None, nullable=True)
 
@@ -332,7 +333,7 @@ class RepoMission(Repo):
                     today_22_kst = datetime.combine(now_kst.date(), datetime.min.time()).replace(hour=22)
                     yesterday_22_kst = today_22_kst - timedelta(days=1)
 
-                    # Convert to UTC and remove timezone info for DB comparison
+                    # convert to UTC
                     yesterday_22_utc = (yesterday_22_kst - timedelta(hours=9))
                     today_22_utc = (today_22_kst - timedelta(hours=9))
 
@@ -360,7 +361,6 @@ class RepoMission(Repo):
             return result.all()
 
         founds = await find_by_template_name(session, MissionModel, name, date)
-
         if not founds:
             return None
 
