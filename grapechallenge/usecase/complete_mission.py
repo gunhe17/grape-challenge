@@ -39,7 +39,8 @@ async def complete_mission(session: AsyncSession, request: Request, input: Compl
             ),
             content=(
                 Content.from_str(input.content) if input.content else None
-            )
+            ),
+            interaction=None
         )
     )
 

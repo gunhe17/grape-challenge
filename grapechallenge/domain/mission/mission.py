@@ -4,6 +4,7 @@ from pydantic import ValidationError
 
 from grapechallenge.domain.common.error import InvalidTypeError
 from grapechallenge.domain.mission.content import Content
+from grapechallenge.domain.mission.interaction import Interaction
 
 
 @dataclass(frozen=True)
@@ -12,6 +13,7 @@ class Mission:
     template_id: str
     fruit_id: str
     content: Optional[Content]
+    interaction: Optional[Interaction]
 
     # #
     # factory
@@ -24,6 +26,7 @@ class Mission:
         template_id: str,
         fruit_id: str,
         content: Optional[Content],
+        interaction: Optional[Interaction],
     ) -> "Mission":
         try:
             return cls(
@@ -31,6 +34,7 @@ class Mission:
                 template_id=template_id,
                 fruit_id=fruit_id,
                 content=content,
+                interaction=interaction,
             )
         except ValidationError as e:
             raise InvalidTypeError.from_pydantic(e)
@@ -43,6 +47,9 @@ class Mission:
             fruit_id=data.get("fruit_id", None),        #type: ignore
             content=(
                 Content.from_str(data["content"]) if data["content"] else None
+            ),
+            interaction=(
+                Interaction.from_list(data["interaction"]) if data["interaction"] else None
             )
         )
 
@@ -56,5 +63,20 @@ class Mission:
             "fruit_id": self.fruit_id,
             "content": (
                 self.content.to_str() if self.content else None
+            ),
+            "interaction": (
+                self.interaction.to_list() if self.interaction else None
             )
         }
+
+    # #
+    # update
+
+    def update_interaction(self, interaction: Optional[Interaction]) -> "Mission":
+        return Mission.new(
+            user_id=self.user_id,
+            template_id=self.template_id,
+            fruit_id=self.fruit_id,
+            content=self.content,
+            interaction=interaction,
+        )

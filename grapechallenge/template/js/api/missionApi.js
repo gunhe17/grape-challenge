@@ -32,5 +32,46 @@ export const MissionAPI = {
       console.error('미션 조회 오류:', error);
       return { missions: [], count: 0 };
     }
+  },
+
+  /**
+   * 미션에 interaction 추가
+   * @param {string} missionId - 미션 ID
+   * @param {string} emoji - 이모지 (😆, 😮, 💪, 🙏, 👏)
+   * @returns {Promise<Object>} 업데이트된 미션 데이터
+   */
+  async addInteraction(missionId, emoji) {
+    try {
+      const response = await fetch('/mission/interaction', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          mission_id: missionId,
+          emoji: emoji
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return {
+          success: true,
+          mission: data
+        };
+      }
+
+      return {
+        success: false,
+        message: data.message || '인터랙션 추가 실패'
+      };
+    } catch (error) {
+      console.error('인터랙션 추가 오류:', error);
+      return {
+        success: false,
+        message: '네트워크 오류가 발생했습니다'
+      };
+    }
   }
 };

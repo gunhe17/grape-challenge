@@ -96,6 +96,10 @@ Router(
 ).register(app)
 
 Router(
+    "/mission/interaction", ["PATCH"], mission.post_interaction
+).register(app)
+
+Router(
     "/mission/report/daily", ["GET"], mission.get_daily_mission_report
 ).register(app)
 

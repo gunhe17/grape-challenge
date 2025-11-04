@@ -6,6 +6,7 @@ from grapechallenge.usecase import (
     # command
     CompleteMissionInput, complete_mission,
     CompleteTestMissionInput, complete_test_mission,
+    InteractionMissionInput, interaction_mission,
     # query
     GetMissionsByNameInput, get_missions_by_name,
     WriteDailyMissionReportInput, write_daily_mission_report,
@@ -25,6 +26,13 @@ async def post_mission(request: Request, input: CompleteMissionInput) -> JSONRes
 async def post_test_mission(request: Request, input: CompleteTestMissionInput) -> JSONResponse:
     async with transactional_session_helper() as session:
         res = await complete_test_mission(session=session, request=request, input=input)
+
+    return JSONResponse(content=res.content, status_code=res.code)
+
+
+async def post_interaction(request: Request, input: InteractionMissionInput) -> JSONResponse:
+    async with transactional_session_helper() as session:
+        res = await interaction_mission(session=session, request=request, input=input)
 
     return JSONResponse(content=res.content, status_code=res.code)
 

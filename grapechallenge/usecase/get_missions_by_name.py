@@ -41,6 +41,7 @@ async def get_missions_by_name(session: AsyncSession, request: Request, input: G
                     "user_id": found.get("user_id", None),
                     "user_cell": found.get("user_cell", None),
                     "user_name": found.get("user_name", None),
+                    "interaction": found.get("mission_interaction", None),
                 }
                 for found in founds
             ],

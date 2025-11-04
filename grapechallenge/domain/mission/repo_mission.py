@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import Column, String, DateTime, ForeignKey, and_, func
+from sqlalchemy import Column, String, DateTime, ForeignKey, and_, func, ARRAY
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from uuid import uuid4
@@ -18,6 +18,7 @@ class MissionModel(Base):
     template_id = Column(String(36), ForeignKey("mission_templates.id", ondelete="CASCADE"), nullable=False)
     fruit_id = Column(String(36), ForeignKey("fruits.id", ondelete="CASCADE"), nullable=False)
     content = Column(String(1000), nullable=True)
+    interaction = Column(ARRAY(String(1)), nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=None, nullable=True)
 
@@ -86,6 +87,7 @@ class RepoMission(Repo):
                 "template_id": created.template_id,
                 "fruit_id": created.fruit_id,
                 "content": created.content,
+                "interaction": created.interaction,
             }),
             created_at=created.created_at,
             updated_at=created.updated_at,
@@ -113,6 +115,7 @@ class RepoMission(Repo):
                 "template_id": updated.template_id,
                 "fruit_id": updated.fruit_id,
                 "content": updated.content,
+                "interaction": updated.interaction,
             }),
             created_at=updated.created_at,
             updated_at=updated.updated_at,
@@ -144,6 +147,7 @@ class RepoMission(Repo):
                 "template_id": found.template_id,
                 "fruit_id": found.fruit_id,
                 "content": found.content,
+                "interaction": found.interaction,
             }),
             created_at=found.created_at,
             updated_at=found.updated_at,
@@ -173,6 +177,7 @@ class RepoMission(Repo):
                     "template_id": item.template_id,
                     "fruit_id": item.fruit_id,
                     "content": item.content,
+                    "interaction": item.interaction,
                 }),
                 created_at=item.created_at,
                 updated_at=item.updated_at,
@@ -204,6 +209,7 @@ class RepoMission(Repo):
                     "template_id": item.template_id,
                     "fruit_id": item.fruit_id,
                     "content": item.content,
+                    "interaction": item.interaction,
                 }),
                 created_at=item.created_at,
                 updated_at=item.updated_at,
@@ -365,6 +371,7 @@ class RepoMission(Repo):
                 "mission_template_id": found[0].template_id,
                 "mission_fruit_id": found[0].fruit_id,
                 "mission_content": found[0].content,
+                "mission_interaction": found[0].interaction,
                 "mission_created_at": found[0].created_at,
                 "mission_updated_at": found[0].updated_at,
                 "template_id": found[1].id,

@@ -10,9 +10,11 @@ build/
 # Virtual Environment
 .venv/
 
+# Claude
+.claude/
+
 # IDE
 .vscode/
-.idea/
 
 # Environment variables
 .env
