@@ -13,6 +13,9 @@ class GetMissionsByNameInput(BaseModel):
     date: Optional[str] = None
 
 async def get_missions_by_name(session: AsyncSession, request: Request, input: GetMissionsByNameInput) -> UsecaseOutput:
+    user_id = request.cookies.get("user_id", None)
+    if not user_id:
+        return UsecaseOutput(content={"message": "not authenticated"}, code=401)
 
     # get missions
     founds = await RepoMission.get_by_template_name(
@@ -45,7 +48,8 @@ async def get_missions_by_name(session: AsyncSession, request: Request, input: G
                 }
                 for found in founds
             ],
-            "count": len(founds)
+            "count": len(founds),
+            "user_id": user_id,
         },
         code=200
     )

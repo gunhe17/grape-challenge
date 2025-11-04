@@ -39,7 +39,7 @@ async def post_login(request: Request, input: LoginUserInput) -> JSONResponse:
 
     # 로그인 성공 시 쿠키 설정
     if res.code == 200 and res.content.get("user_id"):
-        response.set_cookie(key="user_id", value=str(res.content["user_id"]), httponly=True, path="/", max_age=30*24*60*60)  # 30일
+        response.set_cookie(key="user_id", value=str(res.content["user_id"]), httponly=True, path="/", max_age=30*24*60*60)
         response.set_cookie(key="user_cell", value=quote(input.cell), httponly=False, path="/", max_age=30*24*60*60)
         response.set_cookie(key="user_name", value=quote(input.name), httponly=False, path="/", max_age=30*24*60*60)
 

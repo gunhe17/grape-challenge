@@ -23,11 +23,12 @@ export const MissionAPI = {
       if (response.ok) {
         return {
           missions: data.missions || [],
-          count: data.count || 0
+          count: data.count || 0,
+          user_id: data.user_id || ""
         };
       }
 
-      return { missions: [], count: 0 };
+      return { missions: [], count: 0, user_id: "" };
     } catch (error) {
       console.error('미션 조회 오류:', error);
       return { missions: [], count: 0 };

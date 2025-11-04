@@ -62,6 +62,7 @@ async function fetchDiaries() {
   const result = await MissionAPI.fetchMissionsByName('감사 일기 작성하기', 'today');
   state.diaries = result.missions;
   state.count = result.count;
+  state.currentUserId = result.user_id;
 }
 
 // ========================
@@ -176,10 +177,9 @@ function createDiaryCard(diary, index) {
     dropdown.className = 'fixed bg-white rounded-lg shadow-lg border border-gray-200 p-2';
     dropdown.style.zIndex = '9999';
 
-    // Get user's current interaction emoji if exists
-    const userEmoji = diary.interaction && diary.interaction.length > 0
-      ? diary.interaction[0].icon
-      : null;
+    // Find user's current interaction emoji if exists
+    const userInteraction = diary.interaction?.find(item => item.user_id === state.currentUserId);
+    const userEmoji = userInteraction?.icon || null;
 
     dropdown.innerHTML = `
       <div class="flex items-center gap-1">
