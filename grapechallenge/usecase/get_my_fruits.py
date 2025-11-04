@@ -34,7 +34,7 @@ async def get_my_fruits(session: AsyncSession, request: Request, input: GetMyFru
         content={
             "fruits": [
                 {
-                    "fruit_id": found.get("get", None),
+                    "fruit_id": found.get("fruit_id", None),
                     "status": found.get("status", None),
                     "name": found.get("name", None),
                     "type": found.get("type", None),
