@@ -6,7 +6,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 # local
 from grapechallenge.bin.common.router import Router
-from grapechallenge.endpoint import user, fruit, fruit_template, mission, template, bible
+from grapechallenge.endpoint import (
+    user, fruit, fruit_template, mission, mission_template, template, bible
+)
 
 # Load environment variables
 load_dotenv()
@@ -52,6 +54,10 @@ Router(
     "/cells", ["GET"], user.get_cells
 ).register(app)
 
+Router(
+    "/users/count", ["GET"], user.get_user_count
+).register(app)
+
 # Fruit
 Router(
     "/fruit", ["POST"], fruit.post_fruit
@@ -75,6 +81,14 @@ Router(
 
 Router(
     "/fruits/cell", ["POST"], fruit.get_fruits_by_cell_with_template
+).register(app)
+
+Router(
+    "/fruits/count", ["GET"], fruit.get_fruit_count
+).register(app)
+
+Router(
+    "/fruits/stats/by-template", ["GET"], fruit.get_fruit_stats_by_template
 ).register(app)
 
 # Fruit Template
@@ -103,6 +117,15 @@ Router(
     "/mission/report/daily", ["GET"], mission.get_daily_mission_report
 ).register(app)
 
+# Mission Template
+Router(
+    "/mission-templates", ["GET"], mission_template.get_every_mission_template
+).register(app)
+
+Router(
+    "/mission-template", ["PATCH"], mission_template.patch_mission_template
+).register(app)
+
 # Bible
 Router(
     "/bible/verse", ["POST"], bible.post_bible_verse
@@ -117,6 +140,10 @@ Router(
 ).register(app)
 
 # Template
+Router(
+    "/login", ["GET"], template.login_page
+).register(app)
+
 Router(
     "/", ["GET"], template.home_page
 ).register(app)
@@ -134,11 +161,11 @@ Router(
 ).register(app)
 
 Router(
-    "/login", ["GET"], template.login_page
+    "/report", ["GET"], template.report_page
 ).register(app)
 
 Router(
-    "/report", ["GET"], template.report_page
+    "/admin", ["GET"], template.admin_page
 ).register(app)
 
 

@@ -8,6 +8,7 @@ from grapechallenge.usecase import (
     CompleteTestMissionInput, complete_test_mission,
     InteractionMissionInput, interaction_mission,
     # query
+    GetMissionTemplatesInput, get_mission_templates,
     GetMissionsByNameInput, get_missions_by_name,
     WriteDailyMissionReportInput, write_daily_mission_report,
 )

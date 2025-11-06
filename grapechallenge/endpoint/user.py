@@ -10,6 +10,7 @@ from grapechallenge.usecase import (
     LoginUserInput, login_user,
     LogoutUserInput, logout_user,
     # query
+    GetCountAboutEveryUserInput, get_count_about_every_user,
     GetEveryCellInput, get_every_cell,
 )
 
@@ -66,5 +67,12 @@ async def post_logout(request: Request, input: LogoutUserInput) -> JSONResponse:
 async def get_cells(request: Request, input: GetEveryCellInput = Depends()) -> JSONResponse:
     async with transactional_session_helper() as session:
         res = await get_every_cell(session=session, request=request, input=input)
+
+    return JSONResponse(content=res.content, status_code=res.code)
+
+
+async def get_user_count(request: Request, input: GetCountAboutEveryUserInput = Depends()) -> JSONResponse:
+    async with transactional_session_helper() as session:
+        res = await get_count_about_every_user(session=session, request=request, input=input)
 
     return JSONResponse(content=res.content, status_code=res.code)

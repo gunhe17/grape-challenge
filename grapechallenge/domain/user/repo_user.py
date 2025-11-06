@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Optional, List, Union
+from typing import Optional, List
+from sqlalchemy import distinct, select, func
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
@@ -202,9 +203,6 @@ class RepoUser(Repo):
         cls,
         session: AsyncSession
     ) -> Optional[List[str]]:
-        from sqlalchemy import distinct
-        from sqlalchemy.future import select
-
         async def find_all_distinct_cells(
             session: AsyncSession,
             model_class
@@ -219,6 +217,28 @@ class RepoUser(Repo):
             return None
 
         return list(cells)
+
+    @classmethod
+    async def count_all(
+        cls,
+        session: AsyncSession
+    ) -> int:
+        async def find_count_all(
+            session: AsyncSession,
+            model_class
+        ):
+            from grapechallenge.domain.mission.repo_mission import MissionModel
+
+            query = select(func.count(func.distinct(model_class.id))).join(
+                MissionModel,
+                model_class.id == MissionModel.user_id
+            )
+            result = await session.execute(query)
+            return result.scalar() or 0
+
+        count = await find_count_all(session, UserModel)
+        
+        return count
 
     # TODO: LOG-IN field
     @classmethod

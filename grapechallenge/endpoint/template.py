@@ -98,3 +98,12 @@ async def report_page(request: Request) -> HTMLResponse:
         "request": request,
         "user": user
     })
+
+# admin
+@require_auth()
+async def admin_page(request: Request) -> HTMLResponse:
+    user = get_current_user(request)
+    return templates.TemplateResponse("admin.html", {
+        "request": request,
+        "user": user
+    })

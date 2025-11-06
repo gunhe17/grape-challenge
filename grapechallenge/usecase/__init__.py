@@ -13,9 +13,13 @@ from .create_fruit import CreateFruitInput, create_fruit
 from .create_user import CreateUserInput, create_user
 from .create_users import CreateUsersInput, create_users
 
+from .get_count_about_every_fruit import GetCountAboutEveryFruitInput, get_count_about_every_fruit
+from .get_count_about_every_user import GetCountAboutEveryUserInput, get_count_about_every_user
 from .get_every_cell import GetEveryCellInput, get_every_cell
+from .get_fruit_stats_by_template import GetFruitStatsByTemplateInput, get_fruit_stats_by_template
 from .get_fruit_template_by_name import GetFruitTemplateByNameInput, get_fruit_template_by_name
 from .get_fruits_by_cell_with_template import GetFruitsByCellWithTemplateInput, get_fruits_by_cell_with_template
+from .get_mission_templates import GetMissionTemplatesInput, get_mission_templates
 from .get_missions_by_name import GetMissionsByNameInput, get_missions_by_name
 from .get_my_fruits import GetMyFruitsInput, get_my_fruits
 from .get_my_in_progress_fruit import GetMyInProgressFruitInput, get_my_in_progress_fruit
@@ -25,5 +29,7 @@ from .harvest_fruit import HarvestFruitInput, harvest_fruit
 
 from .login_user import LoginUserInput, login_user
 from .logout_user import LogoutUserInput, logout_user
+
+from .update_mission_template import UpdateMissionTemplateInput, update_mission_template
 
 from .write_daily_mission_report import WriteDailyMissionReportInput, write_daily_mission_report

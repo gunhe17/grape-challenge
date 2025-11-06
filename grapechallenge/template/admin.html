@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Word Challenge - Admin</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png">
+  <link rel="manifest" href="./favicon/site.webmanifest">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+  <link rel="stylesheet" href="./css/animations.css">
+</head>
+<body class="overflow-hidden h-screen">
+  <div class="bg-white h-full flex flex-col">
+    <!-- Header -->
+    <header class="flex-none bg-white sticky top-0 z-20 border-b border-gray-200">
+      <nav aria-label="Global" class="flex items-center justify-between px-5 py-4 lg:px-7">
+        <div class="flex items-center ml-2">
+          <!-- Sidebar toggle button (shown on mobile) -->
+          <button id="sidebar-toggle" class="lg:hidden -m-1 p-1 inline-flex items-center justify-center rounded-md text-gray-700 hover:bg-gray-100">
+            <span class="sr-only">Open sidebar</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6">
+              <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1 flex items-center justify-center">
+          <h1 class="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
+        </div>
+        <div class="flex mr-2">
+          <!-- Empty space for layout balance -->
+          <div class="w-6 h-6"></div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+      <!-- Sidebar Navigation -->
+      <aside class="hidden lg:flex lg:flex-col w-64 border-r border-gray-200 bg-gray-50">
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <div class="mb-4">
+            <h2 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Management</h2>
+          </div>
+
+          <a href="#dashboard" class="nav-link active flex items-center px-3 py-2 text-sm font-medium rounded-lg text-orange-600 bg-orange-100 hover:bg-orange-100 transition-all duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Dashboard
+          </a>
+
+          <a href="#missions" class="nav-link flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-orange-100 transition-all duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            Missions
+          </a>
+
+          <div class="mt-6 pt-6 border-t border-gray-200">
+            <h2 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Statistics</h2>
+          </div>
+
+          <a href="#fruits" class="nav-link flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-orange-100 transition-all duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Fruits
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Mobile Sidebar Toggle (shown on small screens) -->
+      <div id="mobile-sidebar-overlay" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"></div>
+      <aside id="mobile-sidebar" class="hidden fixed inset-y-0 left-0 z-50 w-64 bg-gray-50 lg:hidden transform -translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">Menu</h2>
+          <button id="close-mobile-sidebar" class="rounded-md p-2 text-gray-700 hover:bg-gray-100">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <div class="mb-4">
+            <h2 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Management</h2>
+          </div>
+
+          <a href="#dashboard" class="nav-link-mobile active flex items-center px-3 py-2 text-sm font-medium rounded-lg text-orange-600 bg-orange-100 hover:bg-orange-100 transition-all duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Dashboard
+          </a>
+
+          <a href="#missions" class="nav-link-mobile flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-orange-100 transition-all duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            Missions
+          </a>
+
+          <div class="mt-6 pt-6 border-t border-gray-200">
+            <h2 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Statistics</h2>
+          </div>
+
+          <a href="#fruits" class="nav-link-mobile flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-orange-100 transition-all duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Fruits
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 overflow-y-auto bg-gray-50 scroll-smooth">
+        <!-- Dashboard Section -->
+        <section id="dashboard">
+          <div class="mx-auto max-w-7xl px-5 lg:px-7 py-7 sm:py-10">
+            <!-- Dashboard Header -->
+            <div class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+              <p class="mt-1 text-sm text-gray-600">Word Challenge Admin Dashboard</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <!-- Stat Card 1 -->
+              <div class="relative rounded-xl bg-white px-5 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all animate-fade-in-up">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-orange-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-600">Total Users</p>
+                    <p id="user-count" class="text-2xl font-semibold text-gray-900">-</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stat Card 2 -->
+              <div class="relative rounded-xl bg-white px-5 py-6 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-300 transition-all animate-fade-in-up" style="animation-delay: 0.1s">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-100">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-yellow-600">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="ml-4 flex-1">
+                    <p class="text-sm font-medium text-gray-600">Completed Fruits</p>
+                    <p id="fruit-count" class="text-2xl font-semibold text-gray-900">-</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Missions Section -->
+        <section id="missions">
+          <div class="mx-auto max-w-7xl px-5 lg:px-7 py-7 sm:py-10">
+            <!-- Missions Header -->
+            <div class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900">Mission Templates</h2>
+              <p class="mt-1 text-sm text-gray-600">Manage mission templates</p>
+            </div>
+
+            <!-- Mission Templates Table -->
+            <div class="rounded-2xl border border-gray-200 bg-white">
+              <div class="px-5 py-4 sm:px-6 sm:py-5">
+                <h3 class="text-base font-medium text-gray-800">
+                  All Mission Templates
+                </h3>
+              </div>
+              <div class="border-t border-gray-100 p-5 sm:p-6">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pb-3 sm:px-6">
+                  <div class="max-w-full overflow-x-auto">
+                    <table class="w-full">
+                      <thead>
+                        <tr class="border-gray-100 border-b">
+                          <th class="py-3 font-normal text-left">
+                            <p class="text-gray-500 text-sm">Name</p>
+                          </th>
+                          <th class="py-3 font-normal text-left">
+                            <p class="text-gray-500 text-sm">Content</p>
+                          </th>
+                          <th class="py-3 font-normal text-left">
+                            <p class="text-gray-500 text-sm">Type</p>
+                          </th>
+                          <th class="py-3 font-normal text-center">
+                            <p class="text-gray-500 text-sm">Actions</p>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody id="missions-table-body" class="divide-y divide-gray-100">
+                        <!-- Loading skeleton -->
+                        <tr class="missions-skeleton">
+                          <td colspan="4" class="py-3">
+                            <div class="animate-pulse flex space-x-4">
+                              <div class="flex-1 space-y-3 py-1">
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Fruits Section -->
+        <section id="fruits" class="min-h-screen">
+          <div class="mx-auto max-w-7xl px-5 lg:px-7 py-7 sm:py-10">
+            <div class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900">Fruits Statistics</h2>
+              <p class="mt-1 text-sm text-gray-600">Fruit creation statistics by template</p>
+            </div>
+
+            <!-- Fruits Statistics Table -->
+            <div class="rounded-2xl border border-gray-200 bg-white">
+              <div class="px-5 py-4 sm:px-6 sm:py-5">
+                <h3 class="text-base font-medium text-gray-800">
+                  Fruits by Template
+                </h3>
+              </div>
+              <div class="border-t border-gray-100 p-5 sm:p-6">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pb-3 sm:px-6">
+                  <div class="max-w-full overflow-x-auto">
+                    <table class="w-full">
+                      <thead>
+                        <tr class="border-gray-100 border-b">
+                          <th class="py-3 font-normal text-center w-16">
+                            <p class="text-gray-500 text-sm">Image</p>
+                          </th>
+                          <th class="py-3 font-normal text-left">
+                            <p class="text-gray-500 text-sm">Template Name</p>
+                          </th>
+                          <th class="py-3 font-normal text-left">
+                            <p class="text-gray-500 text-sm">Type</p>
+                          </th>
+                          <th class="py-3 font-normal text-center">
+                            <p class="text-gray-500 text-sm">Total</p>
+                          </th>
+                          <th class="py-3 font-normal text-center">
+                            <p class="text-gray-500 text-sm">In Progress</p>
+                          </th>
+                          <th class="py-3 font-normal text-center">
+                            <p class="text-gray-500 text-sm">Completed</p>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody id="fruits-stats-table-body" class="divide-y divide-gray-100">
+                        <!-- Loading skeleton -->
+                        <tr class="fruits-stats-skeleton">
+                          <td colspan="6" class="py-3">
+                            <div class="animate-pulse flex space-x-4">
+                              <div class="flex-1 space-y-3 py-1">
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+      // Sidebar toggle
+      const sidebarToggleButton = document.getElementById('sidebar-toggle');
+      const mobileSidebar = document.getElementById('mobile-sidebar');
+      const mobileOverlay = document.getElementById('mobile-sidebar-overlay');
+      const closeMobileSidebar = document.getElementById('close-mobile-sidebar');
+
+      // Show mobile sidebar
+      sidebarToggleButton?.addEventListener('click', () => {
+        mobileSidebar?.classList.remove('hidden');
+        mobileOverlay?.classList.remove('hidden');
+        setTimeout(() => {
+          mobileSidebar?.classList.remove('-translate-x-full');
+        }, 10);
+      });
+
+      // Close mobile sidebar
+      closeMobileSidebar?.addEventListener('click', () => {
+        mobileSidebar?.classList.add('-translate-x-full');
+        setTimeout(() => {
+          mobileSidebar?.classList.add('hidden');
+          mobileOverlay?.classList.add('hidden');
+        }, 300);
+      });
+
+      // Close on overlay click
+      mobileOverlay?.addEventListener('click', () => {
+        mobileSidebar?.classList.add('-translate-x-full');
+        setTimeout(() => {
+          mobileSidebar?.classList.add('hidden');
+          mobileOverlay?.classList.add('hidden');
+        }, 300);
+      });
+
+      // Smooth scroll navigation
+      const navLinks = document.querySelectorAll('.nav-link, .nav-link-mobile');
+      const mainContent = document.querySelector('main');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+
+          // Get target section from href
+          const href = link.getAttribute('href');
+          const sectionId = href.replace('#', '');
+          const targetSection = document.getElementById(sectionId);
+
+          if (targetSection) {
+            // Scroll to section
+            targetSection.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+
+          // Update active state
+          navLinks.forEach(l => {
+            l.classList.remove('active', 'bg-orange-100', 'text-orange-600');
+            l.classList.add('text-gray-700');
+          });
+
+          link.classList.add('active', 'bg-orange-100', 'text-orange-600');
+          link.classList.remove('text-gray-700');
+
+          // Close mobile sidebar if open
+          if (window.innerWidth < 1024) {
+            mobileSidebar?.classList.add('-translate-x-full');
+            setTimeout(() => {
+              mobileSidebar?.classList.add('hidden');
+              mobileOverlay?.classList.add('hidden');
+            }, 300);
+          }
+        });
+      });
+
+      // Update active nav based on scroll position
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            navLinks.forEach(link => {
+              const href = link.getAttribute('href');
+              if (href === `#${id}`) {
+                navLinks.forEach(l => {
+                  l.classList.remove('active', 'bg-orange-100', 'text-orange-600');
+                  l.classList.add('text-gray-700');
+                });
+                link.classList.add('active', 'bg-orange-100', 'text-orange-600');
+                link.classList.remove('text-gray-700');
+              }
+            });
+          }
+        });
+      }, {
+        threshold: 0.3,
+        rootMargin: '-50px 0px -50px 0px'
+      });
+
+      // Observe all sections
+      document.querySelectorAll('section[id]').forEach(section => {
+        observer.observe(section);
+      });
+
+      // Load dashboard stats
+      async function loadDashboardStats() {
+        try {
+          // Fetch user count
+          const userResponse = await fetch('/users/count');
+          const userData = await userResponse.json();
+          document.getElementById('user-count').textContent = userData.count || 0;
+
+          // Fetch fruit count
+          const fruitResponse = await fetch('/fruits/count');
+          const fruitData = await fruitResponse.json();
+          document.getElementById('fruit-count').textContent =
+            `${fruitData.completed || 0}/${fruitData.total || 0}`;
+        } catch (error) {
+          console.error('Failed to load dashboard stats:', error);
+        }
+      }
+
+      // Load mission templates
+      async function loadMissionTemplates() {
+        const tbody = document.getElementById('missions-table-body');
+
+        try {
+          const response = await fetch('/mission-templates');
+          const data = await response.json();
+
+          // Remove skeleton
+          const skeleton = tbody.querySelector('.missions-skeleton');
+          if (skeleton) {
+            skeleton.remove();
+          }
+
+          if (data.mission_templates && data.mission_templates.length > 0) {
+            tbody.innerHTML = data.mission_templates.map(template => `
+              <tr>
+                <td class="py-3">
+                  <p class="text-sm font-medium text-gray-700 truncate">${template.name}</p>
+                </td>
+                <td class="py-3">
+                  <p class="text-sm text-gray-700 truncate max-w-md">${template.content}</p>
+                </td>
+                <td class="py-3">
+                  <p class="text-xs inline-block rounded-full px-2 py-0.5 font-medium ${
+                    template.type === 'NORMAL'
+                      ? 'bg-green-50 text-green-600'
+                      : 'bg-blue-50 text-blue-600'
+                  }">
+                    ${template.type}
+                  </p>
+                </td>
+                <td class="py-3 text-center">
+                  <button
+                    class="edit-mission-btn text-sm font-medium text-blue-600 hover:text-blue-900"
+                    data-id="${template.id}"
+                    data-name="${template.name}"
+                    data-content="${template.content}"
+                    data-type="${template.type}"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            `).join('');
+
+            // Add edit button event listeners
+            document.querySelectorAll('.edit-mission-btn').forEach(btn => {
+              btn.addEventListener('click', (e) => {
+                const button = e.currentTarget;
+                openEditModal({
+                  id: button.dataset.id,
+                  name: button.dataset.name,
+                  content: button.dataset.content,
+                  type: button.dataset.type
+                });
+              });
+            });
+          } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-gray-500 text-sm">No mission templates found</td></tr>';
+          }
+        } catch (error) {
+          console.error('Failed to load mission templates:', error);
+          tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-red-500 text-sm">Error loading mission templates</td></tr>';
+        }
+      }
+
+      // Open edit modal
+      function openEditModal(template) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Edit Mission Template</h3>
+            </div>
+            <div class="px-6 py-4 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  id="edit-name"
+                  value="${template.name}"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                <textarea
+                  id="edit-content"
+                  rows="4"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >${template.content}</textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select
+                  id="edit-type"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="NORMAL" ${template.type === 'NORMAL' ? 'selected' : ''}>NORMAL</option>
+                  <option value="SPECIAL" ${template.type === 'SPECIAL' ? 'selected' : ''}>SPECIAL</option>
+                </select>
+              </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                id="cancel-edit-btn"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                id="save-edit-btn"
+                class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Cancel button
+        modal.querySelector('#cancel-edit-btn').addEventListener('click', () => {
+          modal.remove();
+        });
+
+        // Save button
+        modal.querySelector('#save-edit-btn').addEventListener('click', async () => {
+          const name = document.getElementById('edit-name').value;
+          const content = document.getElementById('edit-content').value;
+          const type = document.getElementById('edit-type').value;
+
+          try {
+            const response = await fetch('/mission-template', {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                id: template.id,
+                name,
+                content,
+                type
+              })
+            });
+
+            if (response.ok) {
+              modal.remove();
+              loadMissionTemplates();
+            } else {
+              alert('Failed to update mission template');
+            }
+          } catch (error) {
+            console.error('Failed to update mission template:', error);
+            alert('Error updating mission template');
+          }
+        });
+
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+      }
+
+      // Load fruit statistics
+      async function loadFruitStatistics() {
+        const tbody = document.getElementById('fruits-stats-table-body');
+
+        try {
+          const response = await fetch('/fruits/stats/by-template');
+          const data = await response.json();
+
+          // Remove skeleton
+          const skeleton = tbody.querySelector('.fruits-skeleton');
+          if (skeleton) {
+            skeleton.remove();
+          }
+
+          if (data.stats && data.stats.length > 0) {
+            tbody.innerHTML = data.stats.map(stat => {
+              // Check if seventh_status is an image file path or emoji
+              const isImageFile = stat.seventh_status && (
+                stat.seventh_status.startsWith('/') ||
+                stat.seventh_status.startsWith('http') ||
+                stat.seventh_status.includes('.svg') ||
+                stat.seventh_status.includes('.png') ||
+                stat.seventh_status.includes('.jpg') ||
+                stat.seventh_status.includes('.jpeg')
+              );
+
+              return `
+              <tr>
+                <td class="py-3 text-center">
+                  <div class="flex items-center justify-center">
+                    ${isImageFile
+                      ? `<img src="${stat.seventh_status}" alt="${stat.name}" class="w-8 h-8 rounded-full object-cover" />`
+                      : `<span class="text-2xl">${stat.seventh_status || '🍇'}</span>`
+                    }
+                  </div>
+                </td>
+                <td class="py-3">
+                  <p class="text-sm font-medium text-gray-700">${stat.name}</p>
+                </td>
+                <td class="py-3">
+                  <p class="text-xs inline-block rounded-full px-2 py-0.5 font-medium ${
+                    stat.type === 'NORMAL'
+                      ? 'bg-green-50 text-green-600'
+                      : 'bg-blue-50 text-blue-600'
+                  }">
+                    ${stat.type}
+                  </p>
+                </td>
+                <td class="py-3 text-center">
+                  <p class="text-sm text-gray-700">${stat.total}</p>
+                </td>
+                <td class="py-3 text-center">
+                  <p class="text-sm text-gray-700">${stat.in_progress}</p>
+                </td>
+                <td class="py-3 text-center">
+                  <p class="text-sm text-gray-700">${stat.completed}</p>
+                </td>
+              </tr>
+            `}).join('');
+          } else {
+            tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-500 text-sm">No fruit statistics available</td></tr>';
+          }
+        } catch (error) {
+          console.error('Failed to load fruit statistics:', error);
+          tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-red-500 text-sm">Error loading fruit statistics</td></tr>';
+        }
+      }
+
+      // Initialize dashboard stats, mission templates, and fruit statistics on page load
+      loadDashboardStats();
+      loadMissionTemplates();
+      loadFruitStatistics();
+    });
+  </script>
+</body>
+</html>

@@ -171,6 +171,64 @@ class RepoFruit(Repo):
         found = await find_count_my_completed(session, FruitModel, user_id)
         return found
 
+    @classmethod
+    async def count_all(
+        cls,
+        session: AsyncSession
+    ) -> int:
+        from sqlalchemy import func
+
+        async def find_count_all(
+            session: AsyncSession,
+            model_class
+        ):
+            query = select(func.count(model_class.id))
+            result = await session.execute(query)
+            return result.scalar() or 0
+
+        count = await find_count_all(session, FruitModel)
+        return count
+
+    @classmethod
+    async def count_in_progress(
+        cls,
+        session: AsyncSession
+    ) -> int:
+        from sqlalchemy import func
+
+        async def find_count_in_progress(
+            session: AsyncSession,
+            model_class
+        ):
+            query = select(func.count(model_class.id)).where(
+                model_class.status != "COMPLETED"
+            )
+            result = await session.execute(query)
+            return result.scalar() or 0
+
+        count = await find_count_in_progress(session, FruitModel)
+        return count
+
+    @classmethod
+    async def count_completed(
+        cls,
+        session: AsyncSession
+    ) -> int:
+        from sqlalchemy import func
+
+        async def find_count_completed(
+            session: AsyncSession,
+            model_class
+        ):
+            query = select(func.count(model_class.id)).where(
+                model_class.status == "COMPLETED"
+            )
+            result = await session.execute(query)
+            return result.scalar() or 0
+
+        count = await find_count_completed(session, FruitModel)
+        return count
+
     # #
     # joined
 
@@ -321,6 +379,62 @@ class RepoFruit(Repo):
                 "seventh_status": found[1].seventh_status,
                 "created_at": found[0].created_at,
                 "updated_at": found[0].updated_at,
+            }
+            for found in founds
+        ]
+
+    @classmethod
+    async def get_stats_by_template(
+        cls,
+        session: AsyncSession
+    ) -> Optional[List[dict]]:
+        from sqlalchemy import func, case
+        from grapechallenge.domain.fruit_template import FruitTemplateModel
+
+        async def find_stats_by_template(
+            session: AsyncSession,
+            model_class
+        ):
+            query = select(
+                FruitTemplateModel.id,
+                FruitTemplateModel.name,
+                FruitTemplateModel.type,
+                FruitTemplateModel.seventh_status,
+                func.count(model_class.id).label("total"),
+                func.sum(
+                    case((model_class.status != "COMPLETED", 1), else_=0)
+                ).label("in_progress"),
+                func.sum(
+                    case((model_class.status == "COMPLETED", 1), else_=0)
+                ).label("completed")
+            ).outerjoin(
+                model_class,
+                FruitTemplateModel.id == model_class.template_id
+            ).group_by(
+                FruitTemplateModel.id,
+                FruitTemplateModel.name,
+                FruitTemplateModel.type,
+                FruitTemplateModel.seventh_status
+            ).order_by(
+                FruitTemplateModel.name
+            )
+            result = await session.execute(query)
+            return result.all()
+
+        founds = await find_stats_by_template(session, FruitModel)
+
+        if not founds:
+            return None
+
+        return [
+            {
+                "template_id": found.id,
+                "name": found.name,
+                "type": found.type,
+                "seventh_status": found.seventh_status,
+                "total": found.total or 0,
+                "in_progress": found.in_progress or 0,
+                "completed": found.completed or 0,
             }
             for found in founds
         ]
