@@ -60,5 +60,5 @@ export const EVENT_FRUIT_TEMPLATES = {
  */
 export const EVENT_FRUIT_CONDITIONS = {
   FIRST: 1,   // 1개 완료 후
-  SECOND: 5,  // 5개 완료 후
+  SECOND: 4,  // 5개 완료 후
 };
