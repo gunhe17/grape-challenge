@@ -13,7 +13,10 @@ from grapechallenge.domain.common.error import (
 def kst(dt: Optional[datetime]) -> Optional[str]:
     if not dt:
         return None
-    
+
+    if isinstance(dt, str):
+        return dt
+
     from grapechallenge.config import get_app_env
     app_env = get_app_env()
 
@@ -21,8 +24,8 @@ def kst(dt: Optional[datetime]) -> Optional[str]:
         return dt.isoformat()
     
     if app_env == "prod":
-        kst = timezone(timedelta(hours=9))
-        return dt.replace(tzinfo=timezone.utc).astimezone(kst).isoformat()
+        kst_tz = timezone(timedelta(hours=9))
+        return dt.replace(tzinfo=timezone.utc).astimezone(kst_tz).isoformat()
 
 class Repo:
 

@@ -176,18 +176,22 @@ class RepoMissionTemplate(Repo):
     @classmethod
     async def get_all(
         cls,
-        session: AsyncSession
+        session: AsyncSession,
+        type_filter: Optional[str] = None
     ) -> Optional[List["RepoMissionTemplate"]]:
-        
+
         async def find_all(
             session: AsyncSession,
-            model_class
+            model_class,
+            type_filter: Optional[str] = None
         ):
             query = select(model_class)
+            if type_filter:
+                query = query.where(model_class.type == type_filter)
             result = await session.execute(query)
             return result.scalars().all()
-        
-        founds = await find_all(session, MissionTemplateModel)
+
+        founds = await find_all(session, MissionTemplateModel, type_filter)
 
         if not founds:
             return None

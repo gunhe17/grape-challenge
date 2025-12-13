@@ -117,6 +117,14 @@ Router(
     "/mission/report/daily", ["GET"], mission.get_daily_mission_report
 ).register(app)
 
+Router(
+    "/mission/event/in-progress", ["GET"], mission.get_event_missions
+).register(app)
+
+Router(
+    "/mission/event/complete", ["POST"], mission.post_event_mission
+).register(app)
+
 # Mission Template
 Router(
     "/mission-templates", ["GET"], mission_template.get_every_mission_template
@@ -166,6 +174,18 @@ Router(
 
 Router(
     "/admin", ["GET"], template.admin_page
+).register(app)
+
+Router(
+    "/christmas/login", ["GET"], template.christmas_login_page
+).register(app)
+
+Router(
+    "/christmas/home", ["GET"], template.christmas_home_page
+).register(app)
+
+Router(
+    "/christmas/diary", ["GET"], template.christmas_diary_page
 ).register(app)
 
 

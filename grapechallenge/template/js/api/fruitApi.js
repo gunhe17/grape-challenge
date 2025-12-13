@@ -6,11 +6,15 @@
 export const FruitAPI = {
   /**
    * 현재 진행 중인 과일 조회
+   * @param {string|null} missionType - 미션 타입 필터 (기본: NORMAL)
    * @returns {Promise<Object|null>} 과일 정보 또는 null
    */
-  async fetchCurrentFruit() {
+  async fetchCurrentFruit(missionType = null) {
     try {
-      const response = await fetch('/fruit/in-progress');
+      const url = missionType
+        ? `/fruit/in-progress?mission_type=${encodeURIComponent(missionType)}`
+        : '/fruit/in-progress';
+      const response = await fetch(url);
       const data = await response.json();
 
       if (response.ok && data.fruit && data.fruit.fruit_id) {
@@ -166,6 +170,58 @@ export const FruitAPI = {
       return data.fruit_id ? data : null;
     } catch (error) {
       console.error('테스트 미션 완료 오류:', error);
+      return null;
+    }
+  },
+
+  /**
+   * EVENT 미션 목록 조회
+   * @returns {Promise<Array>} 미션 목록
+   */
+  async fetchEventMissions() {
+    try {
+      const response = await fetch('/mission/event/in-progress');
+      const data = await response.json();
+
+      if (response.ok && data.missions) {
+        return data.missions;
+      }
+      return [];
+    } catch (error) {
+      console.error('EVENT 미션 조회 오류:', error);
+      return [];
+    }
+  },
+
+  /**
+   * EVENT 미션 완료 (fruit 없이)
+   * @param {string} missionName - 미션 이름
+   * @param {string|null} content - 미션 내용 (선택)
+   * @returns {Promise<Object|null>} 완료된 미션 정보 또는 null
+   */
+  async completeEventMission(missionName, content = null) {
+    try {
+      const body = { name: missionName };
+      if (content) {
+        body.content = content;
+      }
+
+      const response = await fetch('/mission/event/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        console.error('EVENT 미션 완료 실패:', response.status, data.message);
+        return null;
+      }
+
+      const data = await response.json();
+      return data.id ? data : null;
+    } catch (error) {
+      console.error('EVENT 미션 완료 오류:', error);
       return null;
     }
   }

@@ -49,17 +49,28 @@ export const MissionCard = {
 
   /**
    * 모든 미션 완료 알림 카드 생성
+   * @param {Object} options - 옵션
+   * @param {boolean} options.transparent - 반투명 스타일 사용 여부
    * @returns {HTMLElement} 카드 엘리먼트
    */
-  createAllMissionsCompletedCard() {
+  createAllMissionsCompletedCard(options = {}) {
+    const { transparent = false } = options;
+
+    const cardClass = transparent
+      ? 'relative rounded-xl bg-white/20 backdrop-blur-sm px-7 py-5 mb-3.5 shadow-sm outline outline-1 -outline-offset-1 outline-white/30 animate-scale-in'
+      : 'relative rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 px-7 py-5 mb-3.5 shadow-sm outline outline-2 -outline-offset-1 outline-orange-300 animate-scale-in';
+
+    const textClass = transparent ? 'text-white' : 'text-gray-900';
+    const subTextClass = transparent ? 'text-gray-300' : 'text-gray-600';
+
     const card = document.createElement('div');
-    card.className = 'relative rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 px-7 py-5 mb-3.5 shadow-sm outline outline-2 -outline-offset-1 outline-orange-300 animate-scale-in';
+    card.className = cardClass;
     card.innerHTML = `
       <div class="flex items-center gap-x-3.5">
         <div class="flex-none text-2xl">🎉</div>
         <div class="flex-1 min-w-0">
-          <p class="text-base font-semibold tracking-tight text-gray-900">오늘의 미션을 모두 완료했어요!</p>
-          <p class="mt-1 text-sm text-gray-600">내일 또 새로운 미션으로 만나요</p>
+          <p class="text-base font-semibold tracking-tight ${textClass}">오늘의 미션을 모두 완료했어요!</p>
+          <p class="mt-1 text-sm ${subTextClass}">내일 또 새로운 미션으로 만나요</p>
         </div>
       </div>
     `;
@@ -100,27 +111,45 @@ export const MissionCard = {
    * 일반 미션 카드 생성
    * @param {Object|null} mission - 미션 정보
    * @param {Function} onCompleteMission - 미션 완료 핸들러
+   * @param {Object} options - 옵션
+   * @param {boolean} options.transparent - 반투명 스타일 사용 여부
    * @returns {HTMLElement} 카드 엘리먼트
    */
-  createDailyMissionCard(mission, onCompleteMission) {
+  createDailyMissionCard(mission, onCompleteMission, options = {}) {
+    const { transparent = false, theme = 'default' } = options;
     const missionName = mission?.name || '오늘의 미션';
     const missionContent = mission?.content || '말씀 한 장 읽기';
     const canComplete = mission?.can_complete ?? true;
 
+    // 테마별 색상 설정
+    const isChristmas = theme === 'christmas';
+    const activeColor = isChristmas ? 'bg-red-600 hover:bg-red-500' : 'bg-orange-500 hover:bg-orange-400';
+    const disabledColor = isChristmas ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600';
+    const hoverOutline = isChristmas ? 'hover:outline-red-200' : 'hover:outline-orange-200';
+
     const buttonDisabled = canComplete ? '' : 'disabled';
     const buttonClass = canComplete
-      ? 'rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-orange-400'
-      : 'rounded-lg bg-orange-100 px-4 py-2 text-sm font-semibold text-orange-600 shadow-xs cursor-not-allowed';
+      ? `rounded-lg ${activeColor} px-4 py-2 text-sm font-semibold text-white shadow-xs`
+      : transparent
+        ? 'rounded-lg bg-white/20 px-4 py-2 text-sm font-semibold text-white/60 shadow-xs cursor-not-allowed'
+        : `rounded-lg ${disabledColor} px-4 py-2 text-sm font-semibold shadow-xs cursor-not-allowed`;
     const buttonText = canComplete ? '완료' : '완료됨';
 
+    const cardClass = transparent
+      ? 'relative rounded-xl bg-white/20 backdrop-blur-sm px-7 py-5 mb-3.5 shadow-sm outline outline-1 -outline-offset-1 outline-white/30 animate-fade-in-up'
+      : `relative rounded-xl bg-white px-7 py-5 mb-3.5 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 ${hoverOutline} animate-fade-in-up`;
+
+    const textClass = transparent ? 'text-white text-outline-thin' : 'text-gray-900';
+    const subTextClass = transparent ? 'text-gray-300 text-outline-thin' : 'text-gray-600';
+
     const card = document.createElement('div');
-    card.className = 'relative rounded-xl bg-white px-7 py-5 mb-3.5 shadow-sm outline outline-1 -outline-offset-1 outline-gray-200 hover:outline-orange-200 animate-fade-in-up';
+    card.className = cardClass;
 
     card.innerHTML = `
       <div class="flex items-center justify-between gap-x-5">
         <div class="flex-1 min-w-0">
-          <p class="text-base font-semibold tracking-tight text-gray-900">${missionName}</p>
-          <p class="mt-1 text-sm text-gray-600">${missionContent}</p>
+          <p class="text-base font-semibold tracking-tight ${textClass}">${missionName}</p>
+          <p class="mt-1 text-sm ${subTextClass}">${missionContent}</p>
         </div>
         <div class="flex-none">
           <button class="complete-mission-btn ${buttonClass}" ${buttonDisabled} data-mission-name="${missionName}">

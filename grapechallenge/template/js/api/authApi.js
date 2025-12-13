@@ -58,28 +58,6 @@ export const AuthAPI = {
   },
 
   /**
-   * 로그인 상태 확인
-   * @returns {Promise<boolean>} 로그인 여부
-   */
-  async isLoggedIn() {
-    try {
-      const response = await fetch('/fruit/in-progress');
-
-      if (response.status === 401) {
-        return false;
-      }
-
-      if (response.ok) {
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      return false;
-    }
-  },
-
-  /**
    * 로그인 페이지로 리다이렉트
    */
   redirectToLogin() {
@@ -91,5 +69,12 @@ export const AuthAPI = {
    */
   redirectToHome() {
     window.location.href = '/home';
+  },
+
+  /**
+   * 크리스마스 홈 페이지로 리다이렉트
+   */
+  redirectToChristmasHome() {
+    window.location.href = '/christmas/home';
   }
 };

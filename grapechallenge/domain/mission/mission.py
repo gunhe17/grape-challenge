@@ -11,7 +11,7 @@ from grapechallenge.domain.mission.interaction import Interaction
 class Mission:
     user_id: str
     template_id: str
-    fruit_id: str
+    fruit_id: Optional[str]
     content: Optional[Content]
     interaction: Optional[Interaction]
 
@@ -24,7 +24,7 @@ class Mission:
         *,
         user_id: str,
         template_id: str,
-        fruit_id: str,
+        fruit_id: Optional[str],
         content: Optional[Content],
         interaction: Optional[Interaction],
     ) -> "Mission":

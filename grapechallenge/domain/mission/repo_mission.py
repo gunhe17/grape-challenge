@@ -17,7 +17,7 @@ class MissionModel(Base):
     id = Column(String(36), primary_key=True)
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     template_id = Column(String(36), ForeignKey("mission_templates.id", ondelete="CASCADE"), nullable=False)
-    fruit_id = Column(String(36), ForeignKey("fruits.id", ondelete="CASCADE"), nullable=False)
+    fruit_id = Column(String(36), ForeignKey("fruits.id", ondelete="CASCADE"), nullable=True)
     content = Column(String(1000), nullable=True)
     interaction = Column(JSONB, nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
@@ -235,7 +235,7 @@ class RepoMission(Repo):
         app_env = get_app_env()
 
         if app_env == "dev":
-            today = datetime.now(timezone.utc).date()
+            today = datetime.now().date()  # 로컬 시간 사용
             query = select(func.count(MissionModel.id)).where(
                 and_(
                     MissionModel.user_id == user_id,
@@ -298,7 +298,7 @@ class RepoMission(Repo):
                 app_env = get_app_env()
 
                 if app_env == "dev":
-                    today = datetime.now(timezone.utc).date()
+                    today = datetime.now().date()  # 로컬 시간 사용
                     conditions.append(
                         cast(model_class.created_at, Date) == today
                     )
@@ -318,8 +318,8 @@ class RepoMission(Repo):
                 app_env = get_app_env()
 
                 if app_env == "dev":
-                    now_utc = datetime.now(timezone.utc)
-                    today_22 = datetime.combine(now_utc.date(), datetime.min.time()).replace(hour=22)
+                    now_local = datetime.now()  # 로컬 시간 사용
+                    today_22 = datetime.combine(now_local.date(), datetime.min.time()).replace(hour=22)
                     yesterday_22 = today_22 - timedelta(days=1)
                     conditions.append(
                         and_(

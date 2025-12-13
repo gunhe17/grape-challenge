@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>말씀 챌린지 - 로그인</title>
-  <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png">
-  <link rel="manifest" href="./favicon/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="h-full overflow-hidden">
@@ -42,17 +42,7 @@
   </div>
 
   <script type="module">
-    import { AuthAPI } from './js/api/authApi.js';
-
-    // 페이지 로드 시 로그인 상태 확인
-    async function checkLoginStatus() {
-      const isLoggedIn = await AuthAPI.isLoggedIn();
-      if (isLoggedIn) {
-        AuthAPI.redirectToHome();
-      }
-    }
-
-    checkLoginStatus();
+    import { AuthAPI } from '/js/api/authApi.js';
 
     // 에러 메시지 관리
     const errorMessage = document.getElementById('error-message');

@@ -64,6 +64,30 @@ async def login_page(request: Request) -> HTMLResponse:
         "request": request
     })
 
+
+async def christmas_login_page(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse("login_christmas.html", {
+        "request": request
+    })
+
+@require_auth(redirect_if_fail="/christmas/login")
+async def christmas_home_page(request: Request) -> HTMLResponse:
+    user = get_current_user(request)
+    app_env = get_app_env()
+    return templates.TemplateResponse("home_christmas.html", {
+        "request": request,
+        "user": user,
+        "app_env": app_env
+    })
+
+@require_auth(redirect_if_fail="/christmas/login")
+async def christmas_diary_page(request: Request) -> HTMLResponse:
+    user = get_current_user(request)
+    return templates.TemplateResponse("diary_christmas.html", {
+        "request": request,
+        "user": user
+    })
+
 @require_auth()
 async def home_page(request: Request) -> HTMLResponse:
     user = get_current_user(request)

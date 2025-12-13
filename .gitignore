@@ -13,6 +13,9 @@ build/
 # Claude
 .claude/
 
+# Data
+.data/
+
 # IDE
 .vscode/
 

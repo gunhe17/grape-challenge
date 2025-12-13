@@ -33,3 +33,7 @@ from .logout_user import LogoutUserInput, logout_user
 from .update_mission_template import UpdateMissionTemplateInput, update_mission_template
 
 from .write_daily_mission_report import WriteDailyMissionReportInput, write_daily_mission_report
+
+from .get_event_missions_in_progress import get_event_missions_in_progress
+
+from .complete_event_mission import CompleteEventMissionInput, complete_event_mission
