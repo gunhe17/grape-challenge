@@ -9,6 +9,7 @@ from grapechallenge.usecase.write_daily_mission_report_helper import generate_re
 
 class WriteDailyMissionReportInput(BaseModel):
     background_image: str = "background1.jpg"
+    mission_name: str
 
 
 async def write_daily_mission_report(
@@ -16,11 +17,11 @@ async def write_daily_mission_report(
     request: Request,
     input: WriteDailyMissionReportInput
 ) -> UsecaseOutput:
-    
+
     # get missions
     founds = await RepoMission.get_by_template_name(
         session=session,
-        name="감사 일기 작성하기",
+        name=input.mission_name,
         date="report"
     )
     if not founds:
@@ -30,7 +31,7 @@ async def write_daily_mission_report(
         )
 
     # generate images
-    result = generate_report_images(founds, background_image=input.background_image)
+    result = generate_report_images(founds, background_image=input.background_image, mission_name=input.mission_name)
 
     if result.get("error"):
         return UsecaseOutput(
@@ -65,13 +66,14 @@ async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", default="./mission_report", help="Output file prefix")
     parser.add_argument("--background", default="background1.jpg", help="Background image filename")
+    parser.add_argument("--mission", required=True, help="Mission template name")
     args = parser.parse_args()
 
     async with transactional_session_helper() as session:
         result = await write_daily_mission_report(
             session=session,
             request=MagicMock(),
-            input=WriteDailyMissionReportInput(background_image=args.background)
+            input=WriteDailyMissionReportInput(background_image=args.background, mission_name=args.mission)
         )
 
         if result.code != 200:

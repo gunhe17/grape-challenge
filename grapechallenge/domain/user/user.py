@@ -1,4 +1,4 @@
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 from pydantic import ValidationError
 
 from grapechallenge.domain.common.error import InvalidTypeError

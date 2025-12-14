@@ -1,5 +1,5 @@
 from typing import List, Dict
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 
 from grapechallenge.domain.common.error import (
     InvalidTypeError,

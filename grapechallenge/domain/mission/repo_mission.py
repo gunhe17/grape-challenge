@@ -235,7 +235,7 @@ class RepoMission(Repo):
         app_env = get_app_env()
 
         if app_env == "dev":
-            today = datetime.now().date()  # 로컬 시간 사용
+            today = datetime.now(timezone.utc).date()
             query = select(func.count(MissionModel.id)).where(
                 and_(
                     MissionModel.user_id == user_id,
@@ -298,7 +298,7 @@ class RepoMission(Repo):
                 app_env = get_app_env()
 
                 if app_env == "dev":
-                    today = datetime.now().date()  # 로컬 시간 사용
+                    today = datetime.now(timezone.utc).date()
                     conditions.append(
                         cast(model_class.created_at, Date) == today
                     )
@@ -315,16 +315,17 @@ class RepoMission(Repo):
                         ) == today_kst
                     )
             elif date == "report":
+                from sqlalchemy import DateTime as SQLDateTime
                 app_env = get_app_env()
 
                 if app_env == "dev":
-                    now_local = datetime.now()  # 로컬 시간 사용
+                    now_local = datetime.now(timezone.utc)
                     today_22 = datetime.combine(now_local.date(), datetime.min.time()).replace(hour=22)
                     yesterday_22 = today_22 - timedelta(days=1)
                     conditions.append(
                         and_(
-                            model_class.created_at >= yesterday_22,
-                            model_class.created_at < today_22
+                            cast(model_class.created_at, SQLDateTime) >= yesterday_22,
+                            cast(model_class.created_at, SQLDateTime) < today_22
                         )
                     )
                 else:
@@ -339,8 +340,8 @@ class RepoMission(Repo):
 
                     conditions.append(
                         and_(
-                            model_class.created_at >= yesterday_22_utc,
-                            model_class.created_at < today_22_utc
+                            cast(model_class.created_at, SQLDateTime) >= yesterday_22_utc,
+                            cast(model_class.created_at, SQLDateTime) < today_22_utc
                         )
                     )
 

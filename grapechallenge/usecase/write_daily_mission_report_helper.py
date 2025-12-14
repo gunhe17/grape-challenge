@@ -6,13 +6,26 @@ from PIL.ImageFont import FreeTypeFont
 
 
 # Configuration
-CONFIG = {
-    "background": "background1.jpg",
-    "text_area": {"x": 160, "y": 670, "width": 1470, "height": 1380},
+DEFAULT_CONFIG = {
     "font_size": 48,
     "author_font_size": 36,
     "line_spacing": 60,
     "text_color": "#2C1810",
+}
+
+# Background-specific text area configurations
+# background1/2: 1782x2520, background3/4: 1677x2382 (ratio ~0.94)
+BACKGROUND_CONFIGS = {
+    "background1.jpg": {"x": 160, "y": 670, "width": 1470, "height": 1580},
+    "background2.jpg": {"x": 160, "y": 670, "width": 1470, "height": 1580},
+    "background3.jpg": {"x": 150, "y": 650, "width": 1380, "height": 1180},
+    "background4.jpg": {"x": 150, "y": 650, "width": 1380, "height": 1180},
+}
+
+CONFIG = {
+    "background": "background1.jpg",
+    "text_area": BACKGROUND_CONFIGS["background1.jpg"],
+    **DEFAULT_CONFIG,
 }
 
 
@@ -92,7 +105,8 @@ def prepare_text_blocks(
     founds: List[dict],
     content_font: Union[FreeTypeFont, ImageFont.ImageFont],
     author_font: Union[FreeTypeFont, ImageFont.ImageFont],
-    max_width: int
+    max_width: int,
+    mission_name: str = "감사일기"
 ) -> List[List[Tuple[str, str]]]:
     """Prepare text blocks for each mission entry (each block should stay together)
 
@@ -110,7 +124,7 @@ def prepare_text_blocks(
             continue
 
         # Prepare author line with smaller font
-        author_text = f"{user_name}의 감사일기:"
+        author_text = f"{user_name}의 {mission_name}:"
         author_lines = wrap_text(author_text, author_font, max_width)
 
         # Prepare content lines with regular font
@@ -209,12 +223,16 @@ def convert_pages_to_bytes(pages: List[Image.Image]) -> List[bytes]:
     return image_bytes_list
 
 
-def generate_report_images(founds: List[dict], background_image: str = "background1.jpg") -> dict:
+def generate_report_images(founds: List[dict], background_image: str = "background1.jpg", mission_name: str = "감사일기") -> dict:
     """Generate report images from mission data"""
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    # Update CONFIG with custom background image
+    # Update CONFIG with custom background image and its text area
     CONFIG["background"] = background_image
+    CONFIG["text_area"] = BACKGROUND_CONFIGS.get(
+        background_image,
+        BACKGROUND_CONFIGS["background1.jpg"]
+    )
 
     original_image = load_background_image(base_dir)
 
@@ -239,7 +257,8 @@ def generate_report_images(founds: List[dict], background_image: str = "backgrou
         founds=founds,
         content_font=content_font,
         author_font=author_font,
-        max_width=text_area["width"]
+        max_width=text_area["width"],
+        mission_name=mission_name
     )
 
     if not text_blocks:

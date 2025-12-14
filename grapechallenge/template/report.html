@@ -22,27 +22,68 @@
         <div class="flex flex-col items-center">
           <!-- Info Section -->
           <div class="w-full mb-6 text-center">
-            <p class="text-sm text-gray-600">어제 22시부터 오늘 22시까지 작성된 감사 일기</p>
+            <p id="info-text" class="text-sm text-gray-600">어제 22시부터 오늘 22시까지 작성된 미션</p>
+          </div>
+
+          <!-- Mission Selection -->
+          <div class="w-full mb-4">
+            <div class="rounded-xl bg-white shadow-sm border border-gray-200 px-5 py-4">
+              <label class="block text-sm font-medium text-gray-700 mb-3">미션 선택</label>
+              <div class="relative">
+                <button
+                  id="mission-select-btn"
+                  type="button"
+                  class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-sm font-medium text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors flex items-center justify-between"
+                >
+                  <span id="mission-select-text">미션을 선택하세요</span>
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div
+                  id="mission-dropdown"
+                  class="hidden absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 max-h-60 overflow-y-auto"
+                >
+                  <div id="mission-options" class="py-1">
+                    <div class="px-4 py-3 text-sm text-gray-500 text-center">로딩 중...</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Background Selection -->
           <div class="w-full mb-6">
             <div class="rounded-xl bg-white shadow-sm border border-gray-200 px-5 py-4">
               <label class="block text-sm font-medium text-gray-700 mb-3">배경 이미지 선택</label>
-              <div class="flex gap-3">
+              <div class="grid grid-cols-2 gap-3">
                 <button
-                  class="background-option flex-1 rounded-lg border-2 border-gray-200 p-3 hover:border-orange-500 transition-all"
+                  class="background-option rounded-lg border-2 border-gray-200 p-3 hover:border-orange-500 transition-all"
                   data-background="background1.jpg"
                 >
                   <div class="aspect-video rounded bg-gradient-to-br from-orange-100 to-orange-200 mb-2"></div>
                   <p class="text-xs font-medium text-gray-700 text-center">배경 1</p>
                 </button>
                 <button
-                  class="background-option flex-1 rounded-lg border-2 border-orange-500 p-3 hover:border-orange-500 transition-all bg-orange-50"
+                  class="background-option rounded-lg border-2 border-orange-500 p-3 hover:border-orange-500 transition-all bg-orange-50"
                   data-background="background2.jpg"
                 >
                   <div class="aspect-video rounded bg-gradient-to-br from-amber-100 to-amber-200 mb-2"></div>
                   <p class="text-xs font-medium text-gray-700 text-center">배경 2</p>
+                </button>
+                <button
+                  class="background-option rounded-lg border-2 border-gray-200 p-3 hover:border-orange-500 transition-all"
+                  data-background="background3.jpg"
+                >
+                  <div class="aspect-video rounded bg-gradient-to-br from-red-200 to-red-300 mb-2"></div>
+                  <p class="text-xs font-medium text-gray-700 text-center">성탄 (빨강)</p>
+                </button>
+                <button
+                  class="background-option rounded-lg border-2 border-gray-200 p-3 hover:border-orange-500 transition-all"
+                  data-background="background4.jpg"
+                >
+                  <div class="aspect-video rounded bg-gradient-to-br from-yellow-100 to-yellow-200 mb-2"></div>
+                  <p class="text-xs font-medium text-gray-700 text-center">성탄 (갈색)</p>
                 </button>
               </div>
             </div>
@@ -109,8 +150,89 @@
   <script type="module">
     let imageBlobs = [];
     let selectedBackground = 'background2.jpg';
+    let selectedMission = '';
+    let missionTemplates = [];
+
+    // Load mission templates
+    async function loadMissionTemplates() {
+      try {
+        const response = await fetch('/mission-templates');
+        const data = await response.json();
+
+        if (data.mission_templates && data.mission_templates.length > 0) {
+          missionTemplates = data.mission_templates;
+          renderMissionOptions();
+
+          // Auto-select first mission
+          if (missionTemplates.length > 0) {
+            selectMission(missionTemplates[0].name);
+          }
+        } else {
+          document.getElementById('mission-options').innerHTML =
+            '<div class="px-4 py-3 text-sm text-gray-500 text-center">미션이 없습니다</div>';
+        }
+      } catch (error) {
+        console.error('Failed to load mission templates:', error);
+        document.getElementById('mission-options').innerHTML =
+          '<div class="px-4 py-3 text-sm text-red-500 text-center">미션 로딩 실패</div>';
+      }
+    }
+
+    // Render mission options
+    function renderMissionOptions() {
+      const optionsContainer = document.getElementById('mission-options');
+      optionsContainer.innerHTML = missionTemplates.map(template => `
+        <button
+          class="mission-option w-full px-4 py-3 text-left text-sm hover:bg-orange-50 transition-colors flex items-center justify-between"
+          data-mission="${template.name}"
+        >
+          <span class="font-medium text-gray-900">${template.name}</span>
+          <svg class="mission-check hidden w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      `).join('');
+
+      // Add click handlers
+      document.querySelectorAll('.mission-option').forEach(btn => {
+        btn.addEventListener('click', () => selectMission(btn.dataset.mission));
+      });
+    }
+
+    // Select mission
+    function selectMission(missionName) {
+      selectedMission = missionName;
+
+      // Update button text
+      document.getElementById('mission-select-text').textContent = missionName;
+
+      // Update checkmarks
+      document.querySelectorAll('.mission-option').forEach(btn => {
+        const check = btn.querySelector('.mission-check');
+        if (btn.dataset.mission === missionName) {
+          check.classList.remove('hidden');
+        } else {
+          check.classList.add('hidden');
+        }
+      });
+
+      // Close dropdown
+      document.getElementById('mission-dropdown').classList.add('hidden');
+
+      // Load report
+      loadReport();
+    }
+
+    // Toggle mission dropdown
+    function toggleMissionDropdown() {
+      document.getElementById('mission-dropdown').classList.toggle('hidden');
+    }
 
     async function loadReport() {
+      if (!selectedMission) {
+        return;
+      }
+
       const loadingEl = document.getElementById('loading');
       const errorEl = document.getElementById('error');
       const errorMessageEl = document.getElementById('error-message');
@@ -126,7 +248,11 @@
         const oldImages = reportContainer.querySelectorAll('.report-image-card');
         oldImages.forEach(img => img.remove());
 
-        const response = await fetch(`/mission/report/daily?background_image=${encodeURIComponent(selectedBackground)}`);
+        const params = new URLSearchParams({
+          background_image: selectedBackground,
+          mission_name: selectedMission
+        });
+        const response = await fetch(`/mission/report/daily?${params.toString()}`);
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -207,7 +333,8 @@
     function downloadImage(url, pageNum) {
       const a = document.createElement('a');
       a.href = url;
-      a.download = `감사일기_리포트_${new Date().toISOString().split('T')[0]}_page${pageNum}.jpg`;
+      const missionLabel = selectedMission.replace(/\s+/g, '_');
+      a.download = `${missionLabel}_리포트_${new Date().toISOString().split('T')[0]}_page${pageNum}.jpg`;
       a.click();
     }
 
@@ -246,9 +373,21 @@
       btn.addEventListener('click', () => selectBackground(btn.dataset.background));
     });
 
+    // Mission dropdown toggle
+    document.getElementById('mission-select-btn')?.addEventListener('click', toggleMissionDropdown);
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('mission-dropdown');
+      const btn = document.getElementById('mission-select-btn');
+      if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-      loadReport();
+      loadMissionTemplates();
     });
   </script>
 </body>
