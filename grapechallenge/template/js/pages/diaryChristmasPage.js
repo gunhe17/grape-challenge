@@ -15,7 +15,7 @@ const EVENT_MISSION_NAMES = [
 
 // 미션 이름별 배지 색상
 const BADGE_COLORS = {
-  '성탄절에 대한 질문': 'bg-blue-50 text-blue-700',
+  '성탄절에 대한 질문': 'bg-red-50 text-red-700',
   '성탄절을 기다리는 기도': 'bg-green-50 text-green-700'
 };
 
@@ -25,8 +25,19 @@ const BADGE_COLORS = {
  * @returns {string} Tailwind 클래스
  */
 function getBadgeColor(missionName) {
-  return BADGE_COLORS[missionName] || 'bg-red-50 text-red-700';
+  return BADGE_COLORS[missionName] || 'bg-white/80 text-gray-700';
 }
+
+// ========================
+// Filter Constants
+// ========================
+const FILTER_MODES = {
+  ALL: 'all'
+};
+
+const FILTER_TEXTS = {
+  [FILTER_MODES.ALL]: '성탄 일기장'
+};
 
 // ========================
 // State Management
@@ -35,7 +46,8 @@ function getBadgeColor(missionName) {
 const state = {
   diaries: [],
   count: 0,
-  currentUserId: ''
+  currentUserId: '',
+  filterMode: FILTER_MODES.ALL
 };
 
 // ========================
@@ -47,7 +59,10 @@ const elements = {
   statsText: null,
   skeleton: null,
   emptyState: null,
-  helpIconBtn: null
+  // Filter dropdown elements
+  filterButton: null,
+  filterMenu: null,
+  filterText: null
 };
 
 // ========================
@@ -62,7 +77,10 @@ function cacheElements() {
   elements.statsText = document.getElementById('diary-stats-text');
   elements.skeleton = document.querySelector('.diary-skeleton');
   elements.emptyState = document.getElementById('diary-empty');
-  elements.helpIconBtn = document.getElementById('help-icon-btn');
+  // Filter dropdown elements
+  elements.filterButton = document.getElementById('diary-filter-button');
+  elements.filterMenu = document.getElementById('diary-filter-menu');
+  elements.filterText = document.getElementById('diary-filter-text');
 }
 
 /**
@@ -70,9 +88,9 @@ function cacheElements() {
  */
 export async function initDiaryChristmasPage() {
   cacheElements();
+  setupFilterDropdown();
   await fetchDiaries();
   renderDiaries();
-  initHelpIconDropdown();
 }
 
 // ========================
@@ -81,12 +99,19 @@ export async function initDiaryChristmasPage() {
 
 /**
  * Fetch diaries from API (EVENT 미션들)
+ * @param {string} filterMode - 필터 모드 ('all' 또는 미션 이름)
  */
-async function fetchDiaries() {
+async function fetchDiaries(filterMode = null) {
+  const currentFilter = filterMode || state.filterMode;
   const allMissions = [];
 
-  // 각 EVENT 미션 이름으로 조회
-  for (const missionName of EVENT_MISSION_NAMES) {
+  // 필터 모드에 따라 조회할 미션 결정
+  const missionsToFetch = currentFilter === FILTER_MODES.ALL
+    ? EVENT_MISSION_NAMES
+    : [currentFilter];
+
+  // 각 미션 이름으로 조회
+  for (const missionName of missionsToFetch) {
     const result = await MissionAPI.fetchMissionsByName(missionName, 'today');
     if (result.missions && result.missions.length > 0) {
       allMissions.push(...result.missions);
@@ -196,68 +221,145 @@ function updateStats() {
   }
 }
 
+/**
+ * Show loading state
+ */
+function showLoadingState() {
+  // Reset stats
+  if (elements.statsText) {
+    elements.statsText.innerHTML = `전체 <span class="font-semibold">0</span>개`;
+  }
+
+  // Remove existing cards
+  const existingCards = elements.diaryList.querySelectorAll('.diary-card');
+  existingCards.forEach(card => card.remove());
+
+  // Hide empty state
+  if (elements.emptyState) {
+    elements.emptyState.classList.add('hidden');
+  }
+
+  // Add skeleton
+  const skeleton = document.createElement('div');
+  skeleton.className = 'diary-skeleton';
+  skeleton.innerHTML = `
+    <div class="rounded-xl bg-white/20 backdrop-blur-sm px-6 py-5 animate-pulse">
+      <div class="space-y-3">
+        <div class="h-4 bg-white/30 rounded w-full"></div>
+        <div class="h-4 bg-white/20 rounded w-4/5"></div>
+        <div class="flex items-center justify-end">
+          <div class="h-3 bg-white/20 rounded w-24"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  elements.diaryList.appendChild(skeleton);
+  elements.skeleton = skeleton;
+}
+
 // ========================
-// Help Icon Dropdown
+// Filter Dropdown
 // ========================
 
 /**
- * Initialize help icon dropdown
+ * Setup filter dropdown event listeners
  */
-function initHelpIconDropdown() {
-  if (!elements.helpIconBtn) return;
+function setupFilterDropdown() {
+  if (!elements.filterButton || !elements.filterMenu) return;
 
-  let helpDropdown = null;
+  // Toggle dropdown on button click
+  elements.filterButton.addEventListener('click', handleFilterDropdownToggle);
 
-  elements.helpIconBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
+  // Handle filter option clicks
+  document.querySelectorAll('.diary-filter-option').forEach(option => {
+    option.addEventListener('click', handleFilterOptionClick);
+  });
 
-    // Remove existing dropdown if any
-    if (helpDropdown) {
-      helpDropdown.remove();
-      helpDropdown = null;
-      return;
-    }
+  // Close dropdown on outside click
+  document.addEventListener('click', handleOutsideClick);
 
-    // Create dropdown
-    helpDropdown = document.createElement('div');
-    helpDropdown.className = 'fixed bg-white rounded-lg shadow-lg border border-gray-200 p-3 max-w-xs';
-    helpDropdown.style.zIndex = '9999';
+  // Initialize selection UI
+  updateFilterSelection();
+}
 
-    helpDropdown.innerHTML = `
-      <p class="text-sm text-gray-700">
-        각 일기마다 가장 많은 공감을 받은<br>이모티콘 두 개가 보여집니다.
-      </p>
-    `;
+/**
+ * Handle dropdown toggle
+ */
+function handleFilterDropdownToggle(e) {
+  e.stopPropagation();
+  const isHidden = elements.filterMenu.classList.toggle('hidden');
+  elements.filterButton.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+}
 
-    // Position dropdown below the button (right-aligned)
-    const rect = elements.helpIconBtn.getBoundingClientRect();
-    helpDropdown.style.right = `${window.innerWidth - rect.right}px`;
-    helpDropdown.style.top = `${rect.bottom + 4}px`;
+/**
+ * Handle filter option click
+ */
+async function handleFilterOptionClick(e) {
+  const filter = e.currentTarget.getAttribute('data-filter');
+  await handleFilterChange(filter);
+}
 
-    document.body.appendChild(helpDropdown);
+/**
+ * Handle outside click to close dropdown
+ */
+function handleOutsideClick(e) {
+  if (elements.filterMenu &&
+      !elements.filterMenu.classList.contains('hidden') &&
+      !elements.filterButton.contains(e.target) &&
+      !elements.filterMenu.contains(e.target)) {
+    closeFilterDropdown();
+  }
+}
 
-    // Close dropdown when clicking outside
-    setTimeout(() => {
-      const closeDropdown = (e) => {
-        if (helpDropdown && !helpDropdown.contains(e.target) && e.target !== elements.helpIconBtn) {
-          helpDropdown.remove();
-          helpDropdown = null;
-          document.removeEventListener('click', closeDropdown);
-          window.removeEventListener('scroll', closeOnScroll, true);
-        }
-      };
+/**
+ * Close filter dropdown
+ */
+function closeFilterDropdown() {
+  elements.filterMenu.classList.add('hidden');
+  elements.filterButton.setAttribute('aria-expanded', 'false');
+}
 
-      const closeOnScroll = () => {
-        if (helpDropdown) {
-          helpDropdown.remove();
-          helpDropdown = null;
-          document.removeEventListener('click', closeDropdown);
-          window.removeEventListener('scroll', closeOnScroll, true);
-        }
-      };
+/**
+ * Handle filter change
+ */
+async function handleFilterChange(filter) {
+  // Update state
+  state.filterMode = filter;
 
-      document.addEventListener('click', closeDropdown);
-      window.addEventListener('scroll', closeOnScroll, true);
-    }, 0);
+  // Update UI
+  updateFilterSelection();
+
+  // Close dropdown
+  closeFilterDropdown();
+
+  // Show loading state
+  showLoadingState();
+
+  // Fetch data with new filter
+  await fetchDiaries(filter);
+
+  // Re-render
+  renderDiaries();
+}
+
+/**
+ * Update filter selection UI (checkmarks and button text)
+ */
+function updateFilterSelection() {
+  // Update button text
+  const displayText = state.filterMode === FILTER_MODES.ALL
+    ? FILTER_TEXTS[FILTER_MODES.ALL]
+    : state.filterMode;
+
+  if (elements.filterText) {
+    elements.filterText.textContent = displayText;
+  }
+
+  // Update checkmarks
+  document.querySelectorAll('.diary-filter-option').forEach(option => {
+    const check = option.querySelector('.filter-check');
+    const optionFilter = option.getAttribute('data-filter');
+    const shouldShow = optionFilter === state.filterMode;
+    check.classList.toggle('hidden', !shouldShow);
   });
 }

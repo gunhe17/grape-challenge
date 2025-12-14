@@ -100,10 +100,40 @@
     </header>
 
     <!-- Page Title Section -->
-    <div class="relative isolate flex-none z-10 pt-4">
+    <div class="relative isolate flex-none z-20 pt-4">
       <div class="mx-auto max-w-7xl px-5 lg:px-7">
-        <div class="text-center">
-          <h1 class="text-2xl font-bold tracking-tight text-white text-outline-thin">성탄 일기장</h1>
+        <div class="text-center relative z-[10000]">
+          <div class="flex items-center justify-center gap-3">
+            <button id="diary-filter-button" type="button" aria-haspopup="menu" aria-expanded="false" class="group flex cursor-pointer justify-center items-center gap-2 rounded-lg min-h-9 px-3 py-1.5 text-2xl font-bold tracking-tight hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none transition-colors whitespace-nowrap">
+              <span id="diary-filter-text" class="text-white text-outline-thin">성탄 일기장</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="text-gray-300">
+                <path d="M12.1338 5.94433C12.3919 5.77382 12.7434 5.80202 12.9707 6.02929C13.1979 6.25656 13.2261 6.60807 13.0556 6.8662L12.9707 6.9707L8.47067 11.4707C8.21097 11.7304 7.78896 11.7304 7.52926 11.4707L3.02926 6.9707L2.9443 6.8662C2.77379 6.60807 2.80199 6.25656 3.02926 6.02929C3.25653 5.80202 3.60804 5.77382 3.86617 5.94433L3.97067 6.02929L7.99996 10.0586L12.0293 6.02929L12.1338 5.94433Z"></path>
+              </svg>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="diary-filter-menu" class="hidden absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 min-w-48 z-[100]">
+              <button data-filter="all" class="diary-filter-option w-full text-left px-4 py-2.5 hover:bg-green-50 transition-colors flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-900">성탄 일기장</span>
+                <svg class="filter-check w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+              <div class="border-t border-gray-200 my-2"></div>
+              <button data-filter="성탄절에 대한 질문" class="diary-filter-option w-full text-left px-4 py-2.5 hover:bg-green-50 transition-colors flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-900">성탄절에 대한 질문</span>
+                <svg class="filter-check hidden w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+              <button data-filter="성탄절을 기다리는 기도" class="diary-filter-option w-full text-left px-4 py-2.5 hover:bg-green-50 transition-colors flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-900">성탄절을 기다리는 기도</span>
+                <svg class="filter-check hidden w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          </div>
           <p class="mt-1 text-sm text-gray-300 text-outline-thin">오늘 우리가 나눈 이야기들</p>
         </div>
       </div>
@@ -113,19 +143,10 @@
     <div class="flex-none z-10 py-4">
       <div class="mx-auto max-w-7xl px-5 lg:px-7">
         <div class="max-w-lg mx-auto">
-          <div class="px-2 flex items-center justify-between">
+          <div class="px-2">
             <p id="diary-stats-text" class="text-sm text-gray-300">
               전체 <span class="font-semibold text-gray-300">0</span>개
             </p>
-            <button
-              id="help-icon-btn"
-              class="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-white/10 transition-colors text-gray-400 relative"
-              aria-label="도움말"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-              </svg>
-            </button>
           </div>
         </div>
       </div>
