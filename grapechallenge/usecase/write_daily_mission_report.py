@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request
@@ -10,6 +11,8 @@ from grapechallenge.usecase.write_daily_mission_report_helper import generate_re
 class WriteDailyMissionReportInput(BaseModel):
     background_image: str = "background1.jpg"
     mission_name: str
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 
 async def write_daily_mission_report(
@@ -22,7 +25,9 @@ async def write_daily_mission_report(
     founds = await RepoMission.get_by_template_name(
         session=session,
         name=input.mission_name,
-        date="report"
+        date="report",
+        start_date=input.start_date,
+        end_date=input.end_date
     )
     if not founds:
         return UsecaseOutput(

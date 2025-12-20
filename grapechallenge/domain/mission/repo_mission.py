@@ -277,7 +277,9 @@ class RepoMission(Repo):
         cls,
         session: AsyncSession,
         name: str,
-        date: Optional[str] = None
+        date: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
     ) -> Optional[List[dict]]:
         from grapechallenge.domain.mission_template.repo_mission_template import MissionTemplateModel
         from grapechallenge.domain.user.repo_user import UserModel
@@ -286,7 +288,9 @@ class RepoMission(Repo):
             session: AsyncSession,
             model_class,
             name: str,
-            date: Optional[str] = None
+            date: Optional[str] = None,
+            start_date: Optional[str] = None,
+            end_date: Optional[str] = None
         ):
             from datetime import datetime, timezone, timedelta
             from sqlalchemy import Date, cast
@@ -318,7 +322,27 @@ class RepoMission(Repo):
                 from sqlalchemy import DateTime as SQLDateTime
                 app_env = get_app_env()
 
-                if app_env == "dev":
+                # Use custom date range if provided
+                if start_date and end_date:
+                    start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+                    end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+
+                    # start_date 22:00 ~ end_date+1 22:00
+                    start_22 = datetime.combine(start_dt.date(), datetime.min.time()).replace(hour=22)
+                    end_22 = datetime.combine(end_dt.date(), datetime.min.time()).replace(hour=22) + timedelta(days=1)
+
+                    if app_env == "prod":
+                        # convert KST to UTC
+                        start_22 = start_22 - timedelta(hours=9)
+                        end_22 = end_22 - timedelta(hours=9)
+
+                    conditions.append(
+                        and_(
+                            cast(model_class.created_at, SQLDateTime) >= start_22,
+                            cast(model_class.created_at, SQLDateTime) < end_22
+                        )
+                    )
+                elif app_env == "dev":
                     now_local = datetime.now(timezone.utc)
                     today_22 = datetime.combine(now_local.date(), datetime.min.time()).replace(hour=22)
                     yesterday_22 = today_22 - timedelta(days=1)
@@ -363,7 +387,7 @@ class RepoMission(Repo):
             result = await session.execute(query)
             return result.all()
 
-        founds = await find_by_template_name(session, MissionModel, name, date)
+        founds = await find_by_template_name(session, MissionModel, name, date, start_date, end_date)
         if not founds:
             return None
 
