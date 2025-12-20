@@ -52,6 +52,32 @@
             </div>
           </div>
 
+          <!-- Date Range Selection -->
+          <div class="w-full mb-4">
+            <div class="rounded-xl bg-white shadow-sm border border-gray-200 px-5 py-4">
+              <label class="block text-sm font-medium text-gray-700 mb-3">날짜 범위</label>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">시작일</label>
+                  <input
+                    type="date"
+                    id="start-date"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+                  >
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">종료일</label>
+                  <input
+                    type="date"
+                    id="end-date"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+                  >
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-2">* 각 날짜의 22시부터 다음날 22시까지의 미션이 포함됩니다</p>
+            </div>
+          </div>
+
           <!-- Background Selection -->
           <div class="w-full mb-6">
             <div class="rounded-xl bg-white shadow-sm border border-gray-200 px-5 py-4">
@@ -152,6 +178,40 @@
     let selectedBackground = 'background2.jpg';
     let selectedMission = '';
     let missionTemplates = [];
+    let startDate = '';
+    let endDate = '';
+
+    // Initialize date inputs with today's date
+    function initializeDates() {
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+
+      document.getElementById('start-date').value = todayStr;
+      document.getElementById('end-date').value = todayStr;
+
+      startDate = todayStr;
+      endDate = todayStr;
+
+      updateInfoText();
+    }
+
+    // Update info text based on selected dates
+    function updateInfoText() {
+      const infoText = document.getElementById('info-text');
+      if (startDate === endDate) {
+        infoText.textContent = `${formatDateKorean(startDate)} 22시부터 다음날 22시까지 작성된 미션`;
+      } else {
+        infoText.textContent = `${formatDateKorean(startDate)} ~ ${formatDateKorean(endDate)} 기간의 미션`;
+      }
+    }
+
+    // Format date to Korean style
+    function formatDateKorean(dateStr) {
+      const date = new Date(dateStr);
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${month}월 ${day}일`;
+    }
 
     // Load mission templates
     async function loadMissionTemplates() {
@@ -250,7 +310,9 @@
 
         const params = new URLSearchParams({
           background_image: selectedBackground,
-          mission_name: selectedMission
+          mission_name: selectedMission,
+          start_date: startDate,
+          end_date: endDate
         });
         const response = await fetch(`/mission/report/daily?${params.toString()}`);
 
@@ -385,8 +447,32 @@
       }
     });
 
+    // Date range change handlers
+    document.getElementById('start-date')?.addEventListener('change', (e) => {
+      startDate = e.target.value;
+      // Ensure end date is not before start date
+      if (endDate < startDate) {
+        endDate = startDate;
+        document.getElementById('end-date').value = startDate;
+      }
+      updateInfoText();
+      loadReport();
+    });
+
+    document.getElementById('end-date')?.addEventListener('change', (e) => {
+      endDate = e.target.value;
+      // Ensure start date is not after end date
+      if (startDate > endDate) {
+        startDate = endDate;
+        document.getElementById('start-date').value = endDate;
+      }
+      updateInfoText();
+      loadReport();
+    });
+
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
+      initializeDates();
       loadMissionTemplates();
     });
   </script>
